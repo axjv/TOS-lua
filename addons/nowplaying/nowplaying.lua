@@ -12,11 +12,16 @@ nowPlaying.textBox = GET_CHILD(nowPlaying.frame, "textbox");
 
 function NOWPLAYING_UPDATE_FRAME()
 	local nowPlaying = _G["ADDONS"]["NOWPLAYING"];
+
+	if nowPlaying.settings.showFrame ~= 1 then return end
+	if imcSound.GetPlayingMusicInst() == nil then return end
+	if config.GetMusicVolume() == 0 then return end
+
 	if nowPlaying.musicInst ~= imcSound.GetPlayingMusicInst() then
-		if imcSound.GetPlayingMusicInst() == nil then return end
-		if nowPlaying.settings.showFrame ~= 1 then return end
 		nowPlaying.musicInst = imcSound.GetPlayingMusicInst();
+
 		local musicFileName = nowPlaying.musicInst:GetFileName();
+		
 		for word in string.gmatch(musicFileName, "bgm\(.-)mp3") do
 			local musicArtist = string.match(musicFileName, "tos_(.-)_");
 			local musicTitle = string.match(musicFileName, "tos_.-_(.-)%.mp3");
