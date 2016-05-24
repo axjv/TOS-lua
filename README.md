@@ -1,17 +1,29 @@
 # TOS-lua
-These addons are intended to be used with [this](https://github.com/Excrulon/Tree-of-Savior-Lua-Mods) or [this](https://github.com/fiote/treeofsavior-addons) addon loader format. [utility.lua](https://github.com/Excrulon/Tree-of-Savior-Lua-Mods/blob/master/addons/utility.lua) is a dependency.
+
+### Please use the [releases](https://github.com/Miei/TOS-lua/releases) section for downloads. This section is for development versions only.
+
+### If you have used development versions (any version that wasn't from [releases](https://github.com/Miei/TOS-lua/releases) ) of my addons, please remove all of those files and do a fresh install of the release version to avoid conflicts.
+
+#### Installation instructions & notes:
+
+A lot of these addons require Miei Utility. Please make sure that you install this as well as the addon(s) that you would like.
+
+When installing a .ipf file to /data/, make sure it has a unicode character at the start of the name. For example: ⚘miei_utility.ipf
+
 
 [![Addon Safe](https://cdn.rawgit.com/lubien/awesome-tos/master/badges/addon-safe.svg)](https://github.com/lubien/awesome-tos#addons-badges)  [![Addon Status Unknown](https://cdn.rawgit.com/lubien/awesome-tos/master/badges/addon-unknown.svg)](https://github.com/lubien/awesome-tos#addons-badges) 
 
 These addons have not been officially approved but are not intrusive and can almost certainly be considered safe. See [here](https://forum.treeofsavior.com/t/stance-on-addons/141262/3) and [here](https://forum.treeofsavior.com/t/stance-on-addons/141262/24) about IMC's stance on addons.
 
-When installing, make sure that the .ipf files in /data have a unicode character in them, or they will not work. For example: ⚗classicchat.ipf
-
 #### cabinetCommas
-Format the silver values for the item listings in the market "sell" and "retrieve" tabs with thousands separators (commas) for readability. [preview](https://i.imgur.com/0jnNGxx.png)
+Format the silver values for the item listings in the market "sell" and "retrieve" tabs with thousands separators (commas) for readability. 
+
+[preview](https://i.imgur.com/0jnNGxx.png)
 
 #### classicChat
 Changes the chat to be more similar to a classic MMO chat frame. [preview](https://i.imgur.com/Z3GgKT7.png)
+
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases) to function.
 
 Features:
 
@@ -22,7 +34,11 @@ Features:
 - Open links from chat in your browser.
 - More
 
-These settings can and should be customized at the top of the lua file. Hex color codes are used.
+These settings can and should be customized in the following file after first launch:
+
+`addons\miei\classicchat-settings.lua`
+
+Hex Color codes are used.
 
 Upon installing this addon, I would recommend that you readjust your [chat's transparency setting](https://i.imgur.com/WCevi1v.png) as the default background skin for the text frame will be replaced with a darker one to allow a greater range of transparency.
 
@@ -31,12 +47,15 @@ This addon will conflict with LKChat, they cannot be used together.
 #### fixFontSizeSlider
 Fix the font size slider in the chat options to dynamically update the font size in the chat frame.
 
+#### mieiUtility
+A utility file for common functions used in my other addons. 
+
+This is a dependency for most of my other addons and should be installed along with them.
+
 #### nowPlaying
 Add text above the chat window to show the currently playing BGM. [preview](https://i.imgur.com/tJGwNUr.png)
 
 You can optionally enable this all of the time, enable it as a notification for a set duration once the BGM changes, or disable it altogether. See the top of the file to change these settings. The default setting is notification style with a 15 second duration.
-
-If you have [cwAPI](https://github.com/fiote/treeofsavior-addons) installed, in-game slash commands will be available, however this is not a dependency for the core functionality of the addon.
 
 Available slash commands:
 
@@ -48,18 +67,25 @@ Available slash commands:
  
 /np can also be used as /music or /nowplaying.
 
+These settings can and should be customized in the following file after first launch:
+
+`addons\miei\nowplaying-settings.lua`
+
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases). 
+
 #### removeFPSCounter
 Hide the FPS counter.
 
-(updated to use event-based ipf format)
+Available slash commands:
+- /fps - toggles the fps counter
+
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
 
 #### removeMapBackground
 Remove the grey dimming background when the full map is opened. [preview](https://i.imgur.com/IfcOlo9.jpg)
 
-(updated to use event-based ipf format)
-
 #### removePetInfo
-Hide pet names and/or HP bars. If you have [cwAPI](https://github.com/fiote/treeofsavior-addons) installed, in-game slash commands will be available, however this is not a dependency for the core functionality of the addon.
+Hide pet names and/or HP bars.
 
 Available slash commands, accessed with /companion or /comp:
 
@@ -68,10 +94,19 @@ Available slash commands, accessed with /companion or /comp:
 - /comp hp [on/off] - Show/hide your pet HP. (Default: off)
 - /comp other [on/off] - Show/hide other pet names. (Default: off)
 
-You can edit the default settings at the top of the file.
+These settings can and should be customized in the following file after first launch:
+
+`addons\miei\removepetinfo-settings.lua`
+
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
+
+#### removeTPButton
+Hides the TP button next to the minimap and replaces it with the slash command "/tp".
+
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
 
 #### toggleDuels
-Allows you to toggle whether or not you will receive duel requests. If you have [cwAPI](https://github.com/fiote/treeofsavior-addons) installed, in-game slash commands will be available, however this is not a dependency for the core functionality of the addon.
+Allows you to toggle whether or not you will receive duel requests.
 
 Available slash commands:
 
@@ -80,4 +115,10 @@ Available slash commands:
 - /duels notify -- Toggle whether you will be notified in chat when a duel request is blocked, e.g. "Blocked duel request from Mie" (Default: on)
 - /duels help -- Information about the addon.
 
-By default, duels are set to "on", meaning you will recieve duel requests. If you would like to edit the default settings, you can do so at the top of the file. It is set this way to prevent inconvenience in the case that somebody unwittingly installs the addon.
+By default, duels are set to "on", meaning you will recieve duel requests. It is set this way to prevent inconvenience in the case that somebody unwittingly installs the addon.
+
+These settings can and should be customized in the following file after first launch:
+
+`addons\miei\toggleduels-settings.lua`
+
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
