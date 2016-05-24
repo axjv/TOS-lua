@@ -1,4 +1,11 @@
-function CHAT_SET_FONTSIZE_HOOKED(num)
+local addonName = "FIXFONTSIZESLIDER";
+
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
+local g = _G['ADDONS']['MIEI'][addonName];
+
+function g.chatSetFontsize(num)
 	local chatFrame = ui.GetFrame("chatframe");
 	if chatFrame == nil then
 		return;
@@ -42,4 +49,6 @@ function CHAT_SET_FONTSIZE_HOOKED(num)
 	chatFrame:Invalidate();
 end
 
-SETUP_HOOK(CHAT_SET_FONTSIZE_HOOKED, "CHAT_SET_FONTSIZE");
+-- INIT
+_G["CHAT_SET_FONTSIZE"] = g.chatSetFontsize;
+-- /INIT

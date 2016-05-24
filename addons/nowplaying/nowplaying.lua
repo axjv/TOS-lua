@@ -1,88 +1,149 @@
-local settings = {
-	showFrame = 1; 				-- Default enable or disable onscreen text. This will also disable notifications.
-	onlyNotification = 1;		-- Do you want to only show text as a temporary notification after bgm changes?
-	notifyDuration = 15;		-- Duration of the notification text
-	chatMessage = 0;			-- Chat message for each new bgm?
-}
+local addonName = "NOWPLAYING";
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
-local nowPlaying = _G["ADDONS"]["NOWPLAYING"];
-nowPlaying.chatFrame = ui.GetFrame("chatframe");
-nowPlaying.frame = ui.GetFrame("nowplaying");
-nowPlaying.textBox = GET_CHILD(nowPlaying.frame, "textbox");
+local g = _G["ADDONS"]['MIEI'][addonName];
 
-function NOWPLAYING_UPDATE_FRAME()
-	local nowPlaying = _G["ADDONS"]["NOWPLAYING"];
-
-	if nowPlaying.settings.showFrame ~= 1 then return end
-	if imcSound.GetPlayingMusicInst() == nil then return end
-	if config.GetMusicVolume() == 0 then return end
-
-	if nowPlaying.musicInst ~= imcSound.GetPlayingMusicInst() then
-		nowPlaying.musicInst = imcSound.GetPlayingMusicInst();
-
-		local musicFileName = nowPlaying.musicInst:GetFileName();
+if not g.loaded then
+	g.settings = {
+		showFrame = 1;
+		onlyNotification = 0;
+		notifyDuration = 15;
+		chatMessage = 0;
+		version = 0.1;
 		
-		for word in string.gmatch(musicFileName, "bgm\(.-)mp3") do
-			local musicArtist = string.match(musicFileName, "tos_(.-)_");
-			local musicTitle = string.match(musicFileName, "tos_.-_(.-)%.mp3");
-			musicTitle = string.gsub(musicTitle, '_', ' ');
+	}
+end
 
-			if musicArtist == "Tree" then
-				musicTitle = "Tree of Savior";
-				musicArtist = "Cinenote; Sevin";
-			end
-			if musicArtist == "SFA" then
-				musicArtist = "S.F.A"
-			end
+g.settingsComment = [[%s
+Now Playing by Miei, settings file
+http://github.com/Miei/TOS-lua
 
-			nowPlaying.currentTrack = string.format('Now playing: %s - %s', musicArtist, musicTitle);
-			nowPlaying.frame:ShowWindow(nowPlaying.settings.showFrame);
+showFrame 			- Default enable or disable onscreen text. This will also disable notifications.
+onlyNotification 	- Do you want to only show text as a temporary notification after bgm changes?
+notifyDuration		- Duration of the notification text
+chatMessage			- Chat message for each new bgm?
 
-			nowPlaying.frame:ShowWindow(1);
-			if nowPlaying.settings.onlyNotification == 1 then
-				nowPlaying.frame:SetDuration(nowPlaying.settings.notifyDuration);
-			end
+version				- do not touch this
 
-			if nowPlaying.settings.chatMessage == 1 then
-				CHAT_SYSTEM(nowPlaying.currentTrack);
-			end
+%s
 
-			nowPlaying.frame:SetPos(nowPlaying.chatFrame:GetX()+2, nowPlaying.chatFrame:GetY()-nowPlaying.frame:GetHeight());
-			nowPlaying.textBox:SetTextByKey("text", nowPlaying.currentTrack);
+]];
+
+g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
+g.settingsFileLoc = "../addons/miei/nowplaying-settings.lua";
+
+-- INIT
+g.addon:RegisterMsg("GAME_START_3SEC", "NOWPLAYING_3SEC")
+-- /INIT
+
+function NOWPLAYING_3SEC()
+	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
+	local utils = _G['ADDONS']['MIEI']['utils'];
+
+	g.chatFrame = ui.GetFrame("chatframe");
+	g.frame = ui.GetFrame("nowplaying");
+	g.textBox = GET_CHILD(g.frame, "textbox");
+
+	if not g.loaded then
+		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+
+		g.addon:RegisterMsg('FPS_UPDATE', 'NOWPLAYING_UPDATE_FRAME');
+
+		g.frame:ShowWindow(g.settings.showFrame);
+
+		if g.settings.onlyNotification == 1 then
+			g.frame:SetDuration(g.settings.notifyDuration);
 		end
+
+		utils.slashcommands['/nowplaying'] = g.processCommand;
+		utils.slashcommands['/np'] = g.processCommand;
+		CHAT_SYSTEM('[nowPlaying:help] /np [on/off]');
+
+		g.loaded = true;
 	end
 end
 
-function nowPlaying.processCommand(words)
+function NOWPLAYING_UPDATE_FRAME()
+	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
+
+	if g.settings.showFrame ~= 1 then return end
+	if imcSound.GetPlayingMusicInst() == nil then 
+		g.frame:ShowWindow(0);
+		return
+	end
+	if config.GetMusicVolume() == 0 then return end
+	if g.musicInst == imcSound.GetPlayingMusicInst() then return end
+
+	g.musicInst = imcSound.GetPlayingMusicInst();
+
+	local musicFileName = g.musicInst:GetFileName();
+	
+	for word in string.gmatch(musicFileName, "bgm\(.-)mp3") do
+		local musicArtist = string.match(musicFileName, "tos_(.-)_");
+		local musicTitle = string.match(musicFileName, "tos_.-_(.-)%.mp3");
+		musicTitle = string.gsub(musicTitle, '_', ' ');
+
+		if musicArtist == "Tree" then
+			musicTitle = "Tree of Savior";
+			musicArtist = "Cinenote; Sevin";
+		end
+		if musicArtist == "SFA" then
+			musicArtist = "S.F.A"
+		end
+
+		g.currentTrack = string.format('Now playing: %s - %s', musicArtist, musicTitle);
+
+		g.frame:ShowWindow(1);
+		if g.settings.onlyNotification == 1 then
+			g.frame:SetDuration(g.settings.notifyDuration);
+		end
+
+		if g.settings.chatMessage == 1 then
+			CHAT_SYSTEM(g.currentTrack);
+		end
+
+		g.frame:SetPos(g.chatFrame:GetX()+2, g.chatFrame:GetY()-g.frame:GetHeight());
+		g.textBox:SetTextByKey("text", g.currentTrack);
+	end
+end
+
+function g.processCommand(words)
+	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
 	local cmd = table.remove(words,1);
 	if cmd == 'off' then
-		nowPlaying.settings.showFrame = 0;
-		nowPlaying.frame:ShowWindow(0);
+		g.settings.showFrame = 0;
+		g.frame:ShowWindow(0);
+		g.save()
 		return;
 	elseif cmd == 'on' then
-		nowPlaying.settings.showFrame = 1;
-		nowPlaying.frame:ShowWindow(1);
+		g.settings.showFrame = 1;
+		g.frame:ShowWindow(1);
+		g.save()
 		return;
 	elseif cmd == 'chat' then
 		cmd = table.remove(words,1);
 		if cmd == 'on' then
-			nowPlaying.settings.chatMessage = 1;
-			cwAPI.util.log("[nowPlaying] Chat messages enabled");
-			nowPlaying.frame.SetDuration(nowPlaying.settings.notifyDuration);
+			g.settings.chatMessage = 1;
+			CHAT_SYSTEM("[nowPlaying] Chat messages enabled");
+			g.frame.SetDuration(g.settings.notifyDuration);
 		elseif cmd == 'off' then
-			nowPlaying.settings.chatMessage = 0;
-			cwAPI.util.log("[nowPlaying] Chat messages disabled");
+			g.settings.chatMessage = 0;
+			CHAT_SYSTEM("[nowPlaying] Chat messages disabled");
 		end
+		g.save()
 		return;
 	elseif cmd == 'notify' then
 		cmd = table.remove(words,1);
 		if cmd == 'on' then
-			nowPlaying.settings.onlyNotification = 1;
-			cwAPI.util.log("[nowPlaying] Notify mode enabled");
+			g.settings.onlyNotification = 1;
+			CHAT_SYSTEM("[nowPlaying] Notify mode enabled");
 		elseif cmd == 'off' then
-			nowPlaying.settings.onlyNotification = 0;
-			cwAPI.util.log("[nowPlaying] Notify mode disabled");
+			g.settings.onlyNotification = 0;
+			CHAT_SYSTEM("[nowPlaying] Notify mode disabled");
 		end
+		g.save()
 		return;
 	elseif cmd == 'help' then
 		local msg = 'nowPlaying{nl}';
@@ -102,40 +163,22 @@ function nowPlaying.processCommand(words)
 		msg = msg .. '/np help{nl}';
 		msg = msg .. 'Shows this window.{nl}';
 		msg = msg .. '-----------{nl}';
-		msg = msg .. '/np can also be used as /music or /nowplaying';
+		msg = msg .. '/np can also be used as /nowplaying';
 
 		return ui.MsgBox(msg,"","Nope");
 	end
 
 	local msg = '';
-	msg = nowPlaying.currentTrack;
+	msg = g.currentTrack;
 	if msg == '' then
 		msg = 'Now Playing: None';
 	end
-	cwAPI.util.log(msg);
+	CHAT_SYSTEM(msg);
 end
 
-if not nowPlaying.loaded then
-	nowPlaying.settings = settings;
-	nowPlaying.frame:ShowWindow(settings.showFrame);
-
-	if settings.onlyNotification == 1 then
-		nowPlaying.frame:SetDuration(settings.notifyDuration);
-	end
-
-	nowPlaying.loaded = true;
+function g.save()
+	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	utils.save(g.settings, g.settings.settingsFileLoc, g.settingsComment);
 end
 
-nowPlaying["addon"]:RegisterMsg('FPS_UPDATE', 'NOWPLAYING_UPDATE_FRAME');
-
-if (not cwAPI) then
-	return false;
-else
-	_G['ADDON_LOADER']['nowplaying'] = function()
-		cwAPI.commands.register('/nowplaying',nowPlaying.processCommand);
-		cwAPI.commands.register('/np',nowPlaying.processCommand);
-		cwAPI.commands.register('/music',nowPlaying.processCommand);
-		cwAPI.util.log('[nowPlaying:help] /np [on/off]');
-		return true;
-	end
-end

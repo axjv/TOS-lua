@@ -1,4 +1,14 @@
-local addon = _G["ADDONS"]["CABINETCOMMAS"]["addon"];
+local addonName = "CABINETCOMMAS";
+
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
+local g = _G['ADDONS']['MIEI'][addonName];
+
+-- INIT
+g.addon:RegisterMsg("CABINET_ITEM_LIST", "CABINETCOMMAS_ON_CABINET_ITEM_LIST");
+g.addon:RegisterMsg("MARKET_ITEM_LIST","CABINETCOMMAS_ON_SELL_LIST");
+-- /INIT
 
 function CABINETCOMMAS_ON_CABINET_ITEM_LIST()
 	local frame = ui.GetFrame("market_cabinet");
@@ -35,6 +45,3 @@ function CABINETCOMMAS_ON_SELL_LIST()
 		silverFee:SetTextByKey("value", priceStr);
 	end
 end
-
-addon:RegisterMsg("CABINET_ITEM_LIST", "CABINETCOMMAS_ON_CABINET_ITEM_LIST");
-addon:RegisterMsg("MARKET_ITEM_LIST","CABINETCOMMAS_ON_SELL_LIST");

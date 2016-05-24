@@ -1,8 +1,14 @@
-local addon = _G["ADDONS"]["REMOVEMAPBACKGROUND"]["addon"];
-local frame = _G["ADDONS"]["REMOVEMAPBACKGROUND"]["frame"];
+local addonName = "REMOVEMAPBACKGROUND";
 
-function ADDON_REMOVE_MAP_BACKGROUND()
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
+local g = _G['ADDONS']['MIEI'][addonName];
+
+-- INIT
+	g.addon:RegisterMsg('GAME_START_3SEC', 'REMOVEMAPBACKGROUND');
+-- /INIT
+
+function REMOVEMAPBACKGROUND()
 	GET_CHILD(ui.GetFrame("map"), "bg"):ShowWindow(0);
 end
-
-addon:RegisterMsg('GAME_START_3SEC', 'ADDON_REMOVE_MAP_BACKGROUND');
