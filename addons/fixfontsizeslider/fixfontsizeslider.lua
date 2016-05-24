@@ -1,4 +1,4 @@
-local addonName = "BOSSTRACKER";
+local addonName = "FIXFONTSIZESLIDER";
 
 _G['ADDONS'] = _G['ADDONS'] or {};
 _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
