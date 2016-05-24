@@ -1,5 +1,5 @@
-function REMOVEMAPBACKGROUND_ON_INIT(addon, frame)
-	local addonName = "REMOVEMAPBACKGROUND";
+function FIXFONTSIZESLIDER_ON_INIT(addon, frame)
+	local addonName = "FIXFONTSIZESLIDER";
 
 	_G['ADDONS'] = _G['ADDONS'] or {};
 	_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
