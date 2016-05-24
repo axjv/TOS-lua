@@ -5,10 +5,9 @@ _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
 local g = _G['ADDONS']['MIEI'][addonName];
-
 if g.loaded ~= true then
 	g.settings = {
-		showFPSCounter = 0;
+		showFPSCounter = false;
 		version = 0.1;
 	};
 end
