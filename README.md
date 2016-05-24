@@ -16,7 +16,7 @@
 
 [Remove Map Background](https://github.com/Miei/TOS-lua/releases/tag/remove-map-background)
 
-[remove Pet Info](https://github.com/Miei/TOS-lua/releases/tag/remove-pet-info)
+[Remove Pet Info](https://github.com/Miei/TOS-lua/releases/tag/remove-pet-info)
 
 [Remove TP Button](https://github.com/Miei/TOS-lua/releases/tag/remove-tp-button)
 
