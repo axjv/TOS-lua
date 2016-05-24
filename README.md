@@ -1,8 +1,26 @@
-# TOS-lua
-
-### Please use the [releases](https://github.com/Miei/TOS-lua/releases) section for downloads. This section is for development versions only.
-
 ### If you have used development versions (any version that wasn't from [releases](https://github.com/Miei/TOS-lua/releases) ) of my addons, please remove all of those files and do a fresh install of the release version to avoid conflicts.
+
+### This section is for development versions only. Please use these release links for downloads: 
+
+[Cabinet Commas](https://github.com/Miei/TOS-lua/releases/tag/cabinet-commas)
+
+[Classic Chat](https://github.com/Miei/TOS-lua/releases/tag/classic-chat)
+
+[Fix Font Size Slider](https://github.com/Miei/TOS-lua/releases/tag/fix-font-size-slider)
+
+[Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility)
+
+[Now Playing](https://github.com/Miei/TOS-lua/releases/tag/now-playing)
+
+[Remove FPS Counter](https://github.com/Miei/TOS-lua/releases/tag/remove-fps-counter)
+
+[Remove Map Background](https://github.com/Miei/TOS-lua/releases/tag/remove-map-background)
+
+[remove Pet Info](https://github.com/Miei/TOS-lua/releases/tag/remove-pet-info)
+
+[Remove TP Button](https://github.com/Miei/TOS-lua/releases/tag/remove-tp-button)
+
+[Toggle Duels](https://github.com/Miei/TOS-lua/releases/tag/toggle-duels)
 
 #### Installation instructions & notes:
 
@@ -15,15 +33,15 @@ When installing a .ipf file to /data/, make sure it has a unicode character at t
 
 These addons have not been officially approved but are not intrusive and can almost certainly be considered safe. See [here](https://forum.treeofsavior.com/t/stance-on-addons/141262/3) and [here](https://forum.treeofsavior.com/t/stance-on-addons/141262/24) about IMC's stance on addons.
 
-#### cabinetCommas
+#### [cabinetCommas](https://github.com/Miei/TOS-lua/releases/tag/cabinet-commas)
 Format the silver values for the item listings in the market "sell" and "retrieve" tabs with thousands separators (commas) for readability. 
 
 [preview](https://i.imgur.com/0jnNGxx.png)
 
-#### classicChat
+#### [classicChat](https://github.com/Miei/TOS-lua/releases/tag/classic-chat)
 Changes the chat to be more similar to a classic MMO chat frame. [preview](https://i.imgur.com/Z3GgKT7.png)
 
-This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases) to function.
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility) to function.
 
 Features:
 
@@ -44,15 +62,15 @@ Upon installing this addon, I would recommend that you readjust your [chat's tra
 
 This addon will conflict with LKChat, they cannot be used together.
 
-#### fixFontSizeSlider
+#### [fixFontSizeSlider](https://github.com/Miei/TOS-lua/releases/tag/fix-font-size-slider)
 Fix the font size slider in the chat options to dynamically update the font size in the chat frame.
 
-#### mieiUtility
+#### [mieiUtility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility)
 A utility file for common functions used in my other addons. 
 
 This is a dependency for most of my other addons and should be installed along with them.
 
-#### nowPlaying
+#### [nowPlaying](https://github.com/Miei/TOS-lua/releases/tag/now-playing)
 Add text above the chat window to show the currently playing BGM. [preview](https://i.imgur.com/tJGwNUr.png)
 
 You can optionally enable this all of the time, enable it as a notification for a set duration once the BGM changes, or disable it altogether. See the top of the file to change these settings. The default setting is notification style with a 15 second duration.
@@ -71,20 +89,20 @@ These settings can and should be customized in the following file after first la
 
 `addons\miei\nowplaying-settings.lua`
 
-This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases). 
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility). 
 
-#### removeFPSCounter
+#### [removeFPSCounter](https://github.com/Miei/TOS-lua/releases/tag/remove-fps-counter)
 Hide the FPS counter.
 
 Available slash commands:
 - /fps - toggles the fps counter
 
-This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility).
 
-#### removeMapBackground
+#### [removeMapBackground](https://github.com/Miei/TOS-lua/releases/tag/remove-map-background)
 Remove the grey dimming background when the full map is opened. [preview](https://i.imgur.com/IfcOlo9.jpg)
 
-#### removePetInfo
+#### [removePetInfo](https://github.com/Miei/TOS-lua/releases/tag/remove-pet-info)
 Hide pet names and/or HP bars.
 
 Available slash commands, accessed with /companion or /comp:
@@ -98,14 +116,14 @@ These settings can and should be customized in the following file after first la
 
 `addons\miei\removepetinfo-settings.lua`
 
-This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility).
 
-#### removeTPButton
+#### [removeTPButton](https://github.com/Miei/TOS-lua/releases/tag/remove-tp-button)
 Hides the TP button next to the minimap and replaces it with the slash command "/tp".
 
-This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility).
 
-#### toggleDuels
+#### [toggleDuels](https://github.com/Miei/TOS-lua/releases/tag/toggle-duels)
 Allows you to toggle whether or not you will receive duel requests.
 
 Available slash commands:
@@ -121,4 +139,4 @@ These settings can and should be customized in the following file after first la
 
 `addons\miei\toggleduels-settings.lua`
 
-This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases).
+This addon requires [Miei Utility](https://github.com/Miei/TOS-lua/releases/tag/miei-utility).
