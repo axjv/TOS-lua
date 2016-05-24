@@ -1,11 +1,56 @@
-local settings = {};
-settings.showMyPetName = 1;
-settings.showMyPetHP = 0;
-settings.showOtherPetNames = 0;
+local addonName = "REMOVEPETINFO";
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
+
+local g = _G["ADDONS"]["MIEI"][addonName];
+if g.loaded ~= true then
+	g.settings = {
+		showMyPetName = 1;
+		showMyPetHP = 0;
+		showOtherPetNames = 0;
+		version = 0.1;
+	};
+end
+
+g.settingsComment = [[%s
+Remove Pet Info by Miei, settings file
+http://github.com/Miei/TOS-lua
+
+%s
+
+]];
+
+g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
+g.settingsFileLoc = '../addons/miei/removepetinfo-settings.lua';
 
 
-function UPDATE_COMPANION_TITLE_HOOKED(frame, handle)
-	_G["UPDATE_COMPANION_TITLE_OLD"](frame, handle)
+-- INIT
+	g.addon:RegisterMsg("GAME_START_3SEC", "REMOVEPETINFO_3SEC");
+-- /INIT
+
+function REMOVEPETINFO_3SEC()
+	local g = _G["ADDONS"]["MIEI"]["REMOVEPETINFO"];
+	local utils = _G['ADDONS']['MIEI']['utils'];
+
+	if g.loaded ~= true then
+		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+
+		utils.setupEvent(g.addon, "UPDATE_COMPANION_TITLE", "REMOVEPETINFO_UPDATE_COMPANION_TITLE")
+
+		utils.slashcommands['/comp'] = g.processCommand;
+		utils.slashcommands['/companion'] = g.processCommand;
+		CHAT_SYSTEM('[removePetInfo:help] /comp');
+
+		g.loaded = true;
+	end
+end
+
+function REMOVEPETINFO_UPDATE_COMPANION_TITLE(addonframe, eventMsg)
+	local g = _G["ADDONS"]["MIEI"]["REMOVEPETINFO"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	local frame, handle = utils.eventArgs(eventMsg);
+
 	frame = tolua.cast(frame, "ui::CObject");
 
 	local mycompinfoBox = GET_CHILD_RECURSIVELY(frame, "mycompinfo");
@@ -22,21 +67,21 @@ function UPDATE_COMPANION_TITLE_HOOKED(frame, handle)
 
 	local othernameTxt = GET_CHILD_RECURSIVELY(frame, "othername");
 
-	gauge_stamina:ShowWindow(settings.showMyPetHP)
-	hp_stamina:ShowWindow(settings.showMyPetHP)
-	pcinfo_bg_L:ShowWindow(settings.showMyPetHP)
-	pcinfo_bg_R:ShowWindow(settings.showMyPetHP)
-	mynameRtext:ShowWindow(settings.showMyPetName)
+	gauge_stamina:ShowWindow(tonumber(g.settings.showMyPetHP))
+	hp_stamina:ShowWindow(tonumber(g.settings.showMyPetHP))
+	pcinfo_bg_L:ShowWindow(tonumber(g.settings.showMyPetHP))
+	pcinfo_bg_R:ShowWindow(tonumber(g.settings.showMyPetHP))
+	mynameRtext:ShowWindow(tonumber(g.settings.showMyPetName))
 
-	othernameTxt:ShowWindow(settings.showOtherPetNames)
+	othernameTxt:ShowWindow(tonumber(g.settings.showOtherPetNames))
 
 	frame:Invalidate()
 end
 
 
-
-
-function processPetInfoCommand(words)
+function g.processCommand(words)
+	local g = _G["ADDONS"]["MIEI"]["REMOVEPETINFO"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
 	local cmd = table.remove(words,1);
 
 	if not cmd then
@@ -58,43 +103,35 @@ function processPetInfoCommand(words)
 	elseif cmd == 'name' then
 		cmd = table.remove(words,1);
 		if cmd == 'on' then
-			settings.showMyPetName = 1;
+			g.settings.showMyPetName = 1;
+			CHAT_SYSTEM("[removePetInfo] Showing your pet's name.")
 		elseif cmd == 'off' then
-			settings.showMyPetName = 0;
+			g.settings.showMyPetName = 0;
+			CHAT_SYSTEM("[removePetInfo] Hiding your pet's name.")
 		end
 
 	elseif cmd == 'hp' then
 		cmd = table.remove(words,1);
 		if cmd == 'on' then
-			settings.showMyPetHP = 1;
+			g.settings.showMyPetHP = 1;
+			CHAT_SYSTEM("[removePetInfo] Showing your pet's stats.")
 		elseif cmd == 'off' then
-			settings.showMyPetHP = 0;
+			g.settings.showMyPetHP = 0;
+			CHAT_SYSTEM("[removePetInfo] Hiding your pet's stats.")
 		end
 
 	elseif cmd == 'other' then
 		cmd = table.remove(words,1);
 		if cmd == 'on' then
-			settings.showOtherPetNames =  1;
+			g.settings.showOtherPetNames =  1;
+			CHAT_SYSTEM("[removePetInfo] Showing other pet's names.")
 		elseif cmd == 'off' then
-			settings.showOtherPetNames = 0;
+			g.settings.showOtherPetNames = 0;
+			CHAT_SYSTEM("[removePetInfo] Hiding other pet's names.")
 		end
 
 	else
-		cwAPI.util.log('[removePetInfo] Invalid input. Type "/pet" for help.');
+		CHAT_SYSTEM('[removePetInfo] Invalid input. Type "/companion" for help.');
 	end
-
-end
-
-SETUP_HOOK(UPDATE_COMPANION_TITLE_HOOKED, "UPDATE_COMPANION_TITLE");
-
-if (not cwAPI) then
-	ui.SysMsg('[removePetInfo] could not find cwAPI, you will not be able to change settings in-game.{nl}');
-	return false;
-else
-	_G['ADDON_LOADER']['removepetinfo'] = function()
-		cwAPI.commands.register('/comp',processPetInfoCommand);
-		cwAPI.commands.register('/companion',processPetInfoCommand);
-		cwAPI.util.log('[removePetInfo:help] /comp{nl}');
-		return true;
-	end
+	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
 end

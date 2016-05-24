@@ -1,37 +1,81 @@
-local settings = {};
-settings.duels = true; --Default setting allows duel requests. Change to false if you want to ignore duel requests by default.
-settings.notify = true; --Do you want to receive a chat message each time a duel request is blocked?
+local addonName = "TOGGLEDUELS";
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
-function ASKED_FRIENDLY_FIGHT_HOOKED(handle, familyName)
-	if settings.duels == true then
+local g = _G["ADDONS"]["MIEI"][addonName];
+if not g.loaded then
+	g.settings = {
+		duels = true;
+		notify = true; 
+		version = 0.1;
+	};
+end
+
+g.settingsComment = [[%s
+Toggle Duels by Miei, settings file
+http://github.com/Miei/TOS-lua
+
+
+duels	--Default setting allows duel requests. Change to false if you want to ignore duel requests by default.
+notify 	--Do you want to receive a chat message each time a duel request is blocked?
+%s
+
+]];
+
+g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
+g.settingsFileLoc = '../addons/miei/toggleduels-settings.lua';
+
+--INIT
+g.addon:RegisterMsg("GAME_START_3SEC", "TOGGLEDUELS_3SEC");
+--/INIT
+
+function TOGGLEDUELS_3SEC()
+	local utils = _G['ADDONS']['MIEI']['utils'];
+	local g = _G["ADDONS"]["MIEI"]["TOGGLEDUELS"];
+	if g.loaded ~= true then
+		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		
+		_G["ASKED_FRIENDLY_FIGHT"] = g.AskedFriendlyFight;
+
+		utils.slashcommands['/duels'] = g.processCommand;
+		CHAT_SYSTEM('[toggleDuels:help] /duels help{nl}' .. g.duelStatusString());
+
+		g.loaded = true;
+	end
+end
+
+function g.AskedFriendlyFight(handle, familyName)
+	local g = _G["ADDONS"]["MIEI"]["TOGGLEDUELS"];
+	if g.settings.duels == true then
 		local msgBoxString = ScpArgMsg("DoYouAcceptFriendlyFightingWith{Name}?", "Name", familyName);
 		ui.MsgBox(msgBoxString, string.format("ACK_FRIENDLY_FIGHT(%d)", handle) ,"None");
-	elseif settings.notify == true then
+	elseif g.settings.notify == true then
 		CHAT_SYSTEM('[toggleDuels] Declined duel from ' .. familyName);
 	end
 end
 
-function processDuelsCommand(words)
+function g.processCommand(words)
 	local cmd = table.remove(words,1);
 	local msg = '';
 	
 	if not cmd then
-		if settings.duels == true then
-			settings.duels = false;
+		if g.settings.duels == true then
+			g.settings.duels = false;
 			msg = '[toggleDuels] Duels toggled off.{nl}'
 			
 		else
-			settings.duels = true;
+			g.settings.duels = true;
 			msg = '[toggleDuels] Duels toggled on.{nl}'
 		end
 	
 	elseif cmd == 'off' then
-		settings.duels = false;
-		msg = duelStatusString();
+		g.settings.duels = false;
+		msg = g.duelStatusString();
 	
 	elseif cmd == 'on' then
-		settings.duels = true;
-		msg = duelStatusString();
+		g.settings.duels = true;
+		msg = g.duelStatusString();
 	
 	elseif cmd == 'help' then
 		msg = 'toggleDuels{nl}';
@@ -46,41 +90,28 @@ function processDuelsCommand(words)
 		return ui.MsgBox(msg,"","Nope");
 		
 	elseif cmd == 'notify' then
-		if settings.notify == true then
-			settings.notify = false;
+		if g.settings.notify == true then
+			g.settings.notify = false;
 			msg = '[toggleDuels] Notify setting toggled off.'
 		else
-			settings.notify = true;
+			g.settings.notify = true;
 			msg = '[toggleDuels] Notify setting toggled on.'
 		end
 		
 	else 
 		msg = '[toggleDuels] Invalid input. Valid inputs are: on, off, notify, help.';
 	end
-
-	cwAPI.util.log(msg);
+	CHAT_SYSTEM(msg);
+	local utils = _G['ADDONS']['MIEI']['utils'];
+	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
 end
 
-function duelStatusString()
+function g.duelStatusString()
 	local statusString = '';
-	if settings.duels == false then
+	if g.settings.duels == false then
 		statusString = '[toggleDuels] Declining duels.';
 	else
 		statusString = '[toggleDuels] Allowing duel requests.';
 	end
 	return statusString;
 end
-
-SETUP_HOOK(ASKED_FRIENDLY_FIGHT_HOOKED, "ASKED_FRIENDLY_FIGHT");
-
-if (not cwAPI) then
-	ui.SysMsg('[toggleDuels] could not find cwAPI, you will not be able to change settings in-game.{nl}' .. duelStatusString());
-	return false;
-else
-	_G['ADDON_LOADER']['toggleduels'] = function() 
-		cwAPI.commands.register('/duels',processDuelsCommand);
-		cwAPI.util.log('[toggleDuels:help] /duels help{nl}' .. duelStatusString());
-		return true;
-	end
-end 
-

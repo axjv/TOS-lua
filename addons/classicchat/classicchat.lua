@@ -1,67 +1,149 @@
-local settings = {
-	boldSender = true;				-- put the text before a message in bold, e.g [AM 00:00] [Chat][Sender]:
-	channelTag = false;				-- show or hide the channel tag in each message, e.g. [Party], or [Shout]
-	hideSystemName = true;			-- hide the sender name for system messages
-	urlClickWarning = true;			-- warning before opening a web url
-	timeStamp = true;				-- show timestamps
-	urlMatching = true;				-- do you want to enable URL links in chat?
-};
+local addonName = "CLASSICCHAT";
+_G['ADDONS'] = _G['ADDONS'] or {};
+_G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
+_G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
-settings.whisperSound = {
-	enabled = true;					-- enable or disable sound upon receiving a whisper
+local g = _G['ADDONS']['MIEI'][addonName];
+g.myFamilyName = GETMYFAMILYNAME();
 
-	cooldown = 0; 					-- cooldown in seconds, 0 is off, useful to avoid notification spam.
-	sound = 'sys_jam_slot_equip';	-- notification sound (need better sound, check sound.ipf/SE.lst)
-	onSendingMessage = false;		-- do you want to hear this sound when you send a whisper too?
-	requireNewCluster = true;		-- require a new chat cluster (new "bubble"), useful to avoid notification spam
-}
+if not g.loaded then
+	g.settings = {
+		boldSender = true;
+		channelTag = false;
+		hideSystemName = true;
+		urlClickWarning = true;
+		timeStamp = true;
+		urlMatching = true;	
+		version = 0.1;
+	};
 
-settings.formatting = {				-- brackets to use for each tag
-	channelTagBrackets = "<>";
-	nameTagBrackets = "<>";
-	timeStampBrackets = "[]";
-	indentation = " ";				-- indentation at the start of each new message cluster
-}
+	g.settings.whisperSound = {
+		enabled = true;
+		cooldown = 0; 
+		sound = 'sys_jam_slot_equip';
+		onSendingMessage = false;
+		requireNewCluster = true;
+	};
 
-settings.chatColors = {				-- hex color codes
-	Whisper = 'ff40ff';
-	Normal = 'f4e65c';
-	Shout = 'ff2223';
-	Party = '2da6ff';
-	Guild = '40fb40';
-	System = 'ff9696';
-	Link = "2a58ff"; 				-- default color for party and map links
-};
+	g.settings.formatting = {
+		channelTagBrackets = "<>";
+		nameTagBrackets = "<>";
+		timeStampBrackets = "[]";
+		indentation = " ";
+	};
 
-settings.tagStringColors = {		-- do you want the tag string to be a different colour to the actual message?
-	enabled = false;				-- this part --> [AM 00:00] [Chat][Sender]:
-	Whisper = 'ff40ff';				-- you will need to set your own colours, these defaults are the same as the above colours.
-	Normal = 'f4e65c';
-	Shout = 'ff2223';
-	Party = '2da6ff';
-	Guild = '40fb40';
-	System = 'ff9696';
-};
+	g.settings.chatColors = {	
+		Whisper = 'ff40ff';
+		Normal = 'f4e65c';
+		Shout = 'ff2223';
+		Party = '2da6ff';
+		Guild = '40fb40';
+		System = 'ff9696';
+		Link = "2a58ff"; 
+	};
 
-settings.itemColors = setmetatable({
-	"e1e1e1", 	-- white item
-	"108CFF", 	-- blue item
-	"9F30FF", 	-- purple item
-	"FF4F00", 	-- orange item
-}, {__index = function() return "e1e1e1" end }); -- default, white
+	g.settings.tagStringColors = {
+		enabled = false;
+		Whisper = 'ff40ff';
+		Normal = 'f4e65c';
+		Shout = 'ff2223';
+		Party = '2da6ff';
+		Guild = '40fb40';
+		System = 'ff9696';
+	};
+
+	g.settings.itemColors = {
+		"e1e1e1", 	-- white item
+		"108CFF", 	-- blue item
+		"9F30FF", 	-- purple item
+		"FF4F00", 	-- orange item
+	};
+end
+
+g.settingsComment = [[%s
+ Classic Chat by Miei, settings file
+ http://github.com/Miei/TOS-lua
+
+ Here I will leave some comments about each setting to try and help you use this file.
+
+ boldSender 		- put the text before a message in bold, e.g [AM 00:00] [Chat][Sender]:
+ channelTag 		- show or hide the channel tag in each message, e.g. [Party], or [Shout]
+ hideSystemName		- hide the sender name for system messages
+ urlClickWarning 	- warning before opening a web url
+ timeStamp			- show timestamps
+ urlMatching		- do you want to enable URL links in chat?
+ version			- do not touch this.
 
 
-local classicChat = _G["ADDONS"]["CLASSICCHAT"];
-local myFamilyName = GETMYFAMILYNAME();
+ whisperSound
+ enabled			- enable or disable sound upon receiving a whisper
+ cooldown 			- cooldown in seconds, 0 is off, useful to avoid notification spam.
+ sound				- notification sound (need better sound, check sound.ipf/SE.lst)
+ onSendingMessage	- do you want to hear this sound when you send a whisper too?
+ requireNewCluster	- require a new chat cluster (new "bubble"), useful to avoid notification spam
 
-function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
+ formatting			- brackets to use for each tag
+ indentation		- indentation at the start of each new message cluster
+
+ chatColors			- hex color codes for different chat channels
+ Link 				- default color for party and map links
+
+
+ tagStringColors	- do you want the tag string to be a different colour to the actual message?
+					- this part --> [AM 00:00] [Chat][Sender]:
+					- you will need to set your own colours, these defaults are the same as the above colours.
+%s
+
+]];
+
+g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
+g.settingsFileLoc = "../addons/miei/classicchat-settings.lua";
+
+-- INIT
+	g.addon:RegisterMsg("GAME_START_3SEC", "CLASSICCHAT_3SEC");
+-- /INIT
+
+function CLASSICCHAT_3SEC()
+	local g = _G["ADDONS"]["MIEI"]["CLASSICCHAT"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
+
+	if g.loaded ~= true then
+		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+
+		g.settings.itemColors = setmetatable(g.settings.itemColors, {__index = function() return tostring(g.settings.itemColors[1]) end });
+
+		if g.settings.urlMatching == true then
+			CHAT_SYSTEM("https://classich.at loaded!");
+		else
+			CHAT_SYSTEM("Classic Chat loaded!");
+		end
+
+		g.loaded = true;
+	end
+
+	_G["DRAW_CHAT_MSG"] = g.drawChatMsg;
+	_G["RESIZE_CHAT_CTRL"] = g.resizeChatCtrl;
+	_G["CHAT_SET_OPACITY"] = g.chatSetOpacity;
+	
+	g.isWhisperCooldown = false;
+
+	g.chatSetOpacity(-1);
+end
+
+function g.drawChatMsg(groupBoxName, size, startIndex, frameName)
+	local g = _G['ADDONS']['MIEI']["CLASSICCHAT"];
+
+	if not g.drawinit then
+		g.drawinit = true;
+		g.drawChatMsg("chatgbox_TOTAL", size, 0, frameName);
+		return;
+	end
 
 	if startIndex < 0 then
 		return;
 	end
 
 	if frameName == nil then
-
 		frameName = "chatframe";
 
 		local popupFrameName = "chatpopup_" ..groupBoxName:sub(10, groupBoxName:len())
@@ -76,7 +158,6 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 	local groupBox = GET_CHILD(chatFrame,groupBoxName);
 
 	if groupBox == nil then
-
 		local groupBoxLeftMargin = chatFrame:GetUserConfig("GBOX_LEFT_MARGIN")
 		local groupBoxRightMargin = chatFrame:GetUserConfig("GBOX_RIGHT_MARGIN")
 		local groupBoxTopMargin = chatFrame:GetUserConfig("GBOX_TOP_MARGIN")
@@ -101,7 +182,6 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 	local ypos = 0
 
 	for i = startIndex , size - 1 do
-
 		if i ~= 0 then
 			local clusterInfo = session.ui.GetChatMsgClusterInfo(groupBoxName, i-1)
 			if clusterInfo ~= nil then
@@ -141,35 +221,35 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 		local channelTag = '';
 		local timeStamp = '';
 
-		local chatColor = settings.chatColors[messageType];
+		local chatColor = g.settings.chatColors[messageType];
 
 		local styleString = string.format("{ol}{#%s}", chatColor);
 
 		local tagStyleString = '';
 
-		if settings.tagStringColors.enabled == true then
-			tagStyleString = string.format("{ol}{#%s}", settings.tagStringColors[messageType]);
+		if g.settings.tagStringColors.enabled == true then
+			tagStyleString = string.format("{ol}{#%s}", g.settings.tagStringColors[messageType]);
 		else
 			tagStyleString = string.format("{ol}{#%s}", chatColor);
 		end
 
-		if settings.boldSender == true then
+		if g.settings.boldSender == true then
 			tagStyleString = tagStyleString .. "{ds}";
 		end
 
 		-- channel tag
-		if settings.channelTag == true then
-			local channelTagFormat = string.format("%s%%s%s ", settings.formatting.channelTagBrackets:sub(1,1),  settings.formatting.channelTagBrackets:sub(2,2));
+		if g.settings.channelTag == true then
+			local channelTagFormat = string.format("%s%%s%s ", g.settings.formatting.channelTagBrackets:sub(1,1),  g.settings.formatting.channelTagBrackets:sub(2,2));
 			channelTag = channelTagFormat:format(messageType);
 		end
 
 		-- name tag
-		local nameTagFormat = string.format("%s%%s%s", settings.formatting.nameTagBrackets:sub(1,1),  settings.formatting.nameTagBrackets:sub(2,2));
+		local nameTagFormat = string.format("%s%%s%s", g.settings.formatting.nameTagBrackets:sub(1,1),  g.settings.formatting.nameTagBrackets:sub(2,2));
 		nameTag = nameTagFormat:format(messageSender);
 
 		-- timestamp
-		if settings.timeStamp == true then
-			local timeStampFormat = string.format("%s%%s%s ", settings.formatting.timeStampBrackets:sub(1,1),  settings.formatting.timeStampBrackets:sub(2,2));
+		if g.settings.timeStamp == true then
+			local timeStampFormat = string.format("%s%%s%s ", g.settings.formatting.timeStampBrackets:sub(1,1),  g.settings.formatting.timeStampBrackets:sub(2,2));
 			timeStamp = timeStampFormat:format(clusterInfo:GetTimeStr());
 		end
 
@@ -177,40 +257,40 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 		-- structuring for different scenarios
 		-- [AM 00:00] [System]: msg
 		if messageType == 'System' then
-			if settings.hideSystemName == true then
+			if g.settings.hideSystemName == true then
 				messageText =  string.format("%s%s", styleString, messageText);
 			else
-				messageText =  string.format("%s%s%s%s:{/}%s %s", tagStyleString, settings.formatting.indentation, timeStamp, nameTag, styleString, messageText);
+				messageText =  string.format("%s%s%s%s:{/}%s %s", tagStyleString, g.settings.formatting.indentation, timeStamp, nameTag, styleString, messageText);
 			end
 
 		-- [AM 00:00] [Player] whispers: msg
-		elseif messageType == 'Whisper' and messageSender ~= myFamilyName then
-			messageText =  string.format("%s%s%s%s whispers:{/}%s %s", tagStyleString, settings.formatting.indentation, timeStamp, nameTag, styleString, messageText);
+		elseif messageType == 'Whisper' and messageSender ~= g.myFamilyName then
+			messageText =  string.format("%s%s%s%s whispers:{/}%s %s", tagStyleString, g.settings.formatting.indentation, timeStamp, nameTag, styleString, messageText);
 
 		-- [AM 00:00] To [Player]: msg
 		elseif messageType == 'Whisper' and roomInfo ~= nil then
-			messageText =  string.format("%s%s%sTo %s:{/}%s %s", tagStyleString, settings.formatting.indentation, timeStamp, memberString, styleString, messageText);
+			messageText =  string.format("%s%s%sTo %s:{/}%s %s", tagStyleString, g.settings.formatting.indentation, timeStamp, memberString, styleString, messageText);
 
 		-- [AM 00:00] [Chat][Player]: msg
 		else
-			messageText =  string.format("%s%s%s%s%s:{/}%s %s", tagStyleString, settings.formatting.indentation, timeStamp, channelTag, nameTag, styleString, messageText);
+			messageText =  string.format("%s%s%s%s%s:{/}%s %s", tagStyleString, g.settings.formatting.indentation, timeStamp, channelTag, nameTag, styleString, messageText);
 		end
 
-		if settings.urlMatching == true then
-			messageText = classicChat.processUrls(messageText);
+		if g.settings.urlMatching == true then
+			messageText = g.processUrls(messageText);
 		end
 
-		messageText = classicChat.escape(messageText);
+		messageText = g.escape(messageText);
 
 		-- refresh style after {/} but not {/}{
-		messageText = classicChat.instertText(messageText, "{/}[^{]", "{/}", styleString);
+		messageText = g.instertText(messageText, "{/}[^{]", "{/}", styleString);
 
 
 		-- refresh style after {/} before {a for consecutive chat links
-		messageText = classicChat.instertText(messageText, "{/}[{][a]", "{/}", styleString);
+		messageText = g.instertText(messageText, "{/}[{][a]", "{/}", styleString);
 
 		-- refresh style after {/} before {nl} for newlines directly after chat link
-		messageText = classicChat.instertText(messageText, "{/}[{][n][l][}]", "{/}", styleString);
+		messageText = g.instertText(messageText, "{/}[{][n][l][}]", "{/}", styleString);
 
 		-- item link colours
 		for word in messageText:gmatch("{a SLI.-}{#0000FF}{img.-{/}{/}{/}") do
@@ -218,12 +298,12 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 
 			local messageTextSubstring = itemID .. "}{#0000FF}";
 			local itemObj = CreateIESByID("Item", tonumber(itemID));
-			local itemColor = settings.itemColors[itemObj.ItemGrade];
+			local itemColor = g.settings.itemColors[itemObj.ItemGrade];
 
 			if tostring(itemObj.ItemGrade) == "None" then 			--recipes do not hold an itemgrade
 				local recipeGrade = itemIcon:match("misc(%d)"); 	-- e.g icon_item_gloves_misc[1-5]
 				if recipeGrade ~= nil then
-					itemColor = settings.itemColors[tonumber(recipeGrade)-1];
+					itemColor = g.settings.itemColors[tonumber(recipeGrade)-1];
 				end
 			end
 
@@ -235,98 +315,73 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 		messageText = messageText:gsub("{#000000}", string.format("{#%s}", chatColor));
 
 		--change default color for other links (party, map)
-		messageText = messageText:gsub("{#0000FF}", string.format("{#%s}", settings.chatColors.Link));
+		messageText = messageText:gsub("{#0000FF}", string.format("{#%s}", g.settings.chatColors.Link));
 
 
-		messageText = classicChat.unescape(messageText);
+		messageText = g.unescape(messageText);
 
 		repeat
-		if settings.whisperSound.enabled == true and messageType == "Whisper" and startIndex ~= 0 then
-			if settings.whisperSound.onSendingMessage ~= true and messageSender == myFamilyName then break end
-			if classicChat.isWhisperCooldown == true then break end
-			if settings.whisperSound.requireNewCluster == true and cluster ~= nil then break end
+		if g.settings.whisperSound.enabled == true and messageType == "Whisper" and startIndex ~= 0 then
+			if g.settings.whisperSound.onSendingMessage ~= true and messageSender == g.myFamilyName then break end
+			if g.isWhisperCooldown == true then break end
+			if g.settings.whisperSound.requireNewCluster == true and cluster ~= nil then break end
 
-			imcSound.PlaySoundEvent(settings.whisperSound.sound);
-			classicChat.isWhisperCooldown = true;
-			ReserveScript("classicChat.isWhisperCooldown = false", settings.whisperSound.cooldown);
+			imcSound.PlaySoundEvent(g.settings.whisperSound.sound);
+			g.isWhisperCooldown = true;
+			ReserveScript("g.isWhisperCooldown = false", g.settings.whisperSound.cooldown);
 		end
 		until true
 
-		if cluster ~= nil then -- overwrite existing cluster
+		--text always on the left
+		local chatCtrlName = 'chatu';
+		local horzGravity = ui.LEFT;
 
-			local label = cluster:GetChild('bg');
-			local txt = GET_CHILD(label, "text");
-			txt:SetTextByKey("text", messageText);
+		local fontSize = GET_CHAT_FONT_SIZE();
+		local chatCtrl = groupBox:CreateOrGetControlSet(chatCtrlName, clusterName, horzGravity, ui.TOP, marginLeft, ypos, marginRight, 0);
+		local label = chatCtrl:GetChild('bg');
+		local txt = GET_CHILD(label, "text", "ui::CRichText");
+		local notread = GET_CHILD(label, "notread", "ui::CRichText");
+		local timeBox = GET_CHILD(chatCtrl, "timebox", "ui::CGroupBox");
+		local timeCtrl = GET_CHILD(timeBox, "time", "ui::CRichText");
+		local nameText = GET_CHILD(chatCtrl, "name", "ui::CRichText");
+		local iconPicture = GET_CHILD(chatCtrl, "iconPicture", "ui::CPicture");
 
-			local timeBox = GET_CHILD(cluster, "timebox");
+		chatCtrl:EnableHitTest(1);
 
-			local slflag = messageText:find('a SL')
-			if slflag == nil then
-				label:EnableHitTest(0)
-			else
-				label:EnableHitTest(1)
-			end
+		notread:ShowWindow(0);
+		iconPicture:ShowWindow(0);
 
-			RESIZE_CHAT_CTRL(cluster, label, txt, timeBox)
+		label:SetOffset(25, 0);
+		label:SetAlpha(0);
 
-			if cluster:GetHorzGravity() == ui.RIGHT then
-				cluster:SetOffset( marginRight , ypos);
-			else
-				cluster:SetOffset( marginLeft , ypos);
-			end
+		--resize text box to (almost) fill chat window
+		txt:SetMaxWidth(groupBox:GetWidth()-40);
+		txt:Resize(groupBox:GetWidth()-40, txt:GetHeight());
 
-		else
-			--text always on the left
-			local chatCtrlName = 'chatu';
-			local horzGravity = ui.LEFT;
+		txt:SetTextByKey("size", fontSize);
+		txt:SetTextByKey("text", messageText);
+		txt:SetGravity(ui.LEFT, ui.TOP);
 
-			local fontSize = GET_CHAT_FONT_SIZE();
-			local chatCtrl = groupBox:CreateOrGetControlSet(chatCtrlName, clusterName, horzGravity, ui.TOP, marginLeft, ypos, marginRight, 0);
-			local label = chatCtrl:GetChild('bg');
-			local txt = GET_CHILD(label, "text", "ui::CRichText");
-			local notread = GET_CHILD(label, "notread", "ui::CRichText");
-			local timeBox = GET_CHILD(chatCtrl, "timebox", "ui::CGroupBox");
-			local timeCtrl = GET_CHILD(timeBox, "time", "ui::CRichText");
-			local nameText = GET_CHILD(chatCtrl, "name", "ui::CRichText");
-			local iconPicture = GET_CHILD(chatCtrl, "iconPicture", "ui::CPicture");
+		timeCtrl:SetTextByKey("time", clusterInfo:GetTimeStr());
+		timeBox:ShowWindow(0);
 
+		nameText:SetText('{@st61}'..messageSender..'{/}');
+		nameText:ShowWindow(0);
+
+		if messageType ~= "System" then
+			chatCtrl:SetEventScript(ui.RBUTTONUP, 'CHAT_RBTN_POPUP');
+			chatCtrl:SetUserValue("TARGET_NAME", clusterInfo:GetCommanderName());
 			chatCtrl:EnableHitTest(1);
-
-			notread:ShowWindow(0);
-			iconPicture:ShowWindow(0);
-
-			label:SetOffset(25, 0);
-			label:SetAlpha(0);
-
-			--resize text box to (almost) fill chat window
-			txt:SetMaxWidth(groupBox:GetWidth()-40);
-			txt:Resize(groupBox:GetWidth()-40, txt:GetHeight());
-
-			txt:SetTextByKey("size", fontSize);
-			txt:SetTextByKey("text", messageText);
-			txt:SetGravity(ui.LEFT, ui.TOP);
-
-			timeCtrl:SetTextByKey("time", clusterInfo:GetTimeStr());
-			timeBox:ShowWindow(0);
-
-			nameText:SetText('{@st61}'..messageSender..'{/}');
-			nameText:ShowWindow(0);
-
-			if messageType ~= "System" then
-				chatCtrl:SetEventScript(ui.RBUTTONUP, 'CHAT_RBTN_POPUP');
-				chatCtrl:SetUserValue("TARGET_NAME", clusterInfo:GetCommanderName());
-				chatCtrl:EnableHitTest(1);
-			end
-
-			local slflag = messageText:find('a SL')
-			if slflag == nil then
-				label:EnableHitTest(0)
-			else
-				label:EnableHitTest(1)
-			end
-
-			RESIZE_CHAT_CTRL(chatCtrl, label, txt, timeBox);
 		end
+
+		local slflag = messageText:find('a SL')
+		if slflag == nil then
+			label:EnableHitTest(0)
+		else
+			label:EnableHitTest(1)
+		end
+
+		RESIZE_CHAT_CTRL(chatCtrl, label, txt, timeBox);
 	end
 
 	local scrollend = false
@@ -366,7 +421,7 @@ function CLASSICCHAT_DRAW_CHAT_MSG(groupBoxName, size, startIndex, frameName)
 end
 
 function SLL(text, warned)
-	if settings.urlClickWarning == true and warned ~= true then
+	if g.settings.urlClickWarning == true and warned ~= true then
 		local msgBoxString = "Do you want to open the URL?{nl}"
 		local length = 35;
 		if #text > length then
@@ -395,7 +450,7 @@ local domains = [[.ac.ad.ae.aero.af.ag.ai.al.am.an.ao.aq.ar.arpa.as.asia.at.au
 	.to.tp.tr.travel.tt.tv.tw.tz.ua.ug.uk.um.us.uy.va.vc.ve.vg.vi.vn.vu.web.wf
 	.ws.xxx.ye.yt.yu.za.zm.zr.zw]]
 
-function classicChat.processUrls(text)
+function g.processUrls(text)
 	local minLength = 8;
 	local tlds = {}
 	for tld in domains:gmatch'%w+' do
@@ -415,7 +470,7 @@ function classicChat.processUrls(text)
 		then
 			finished[pos_start] = true
 			if #url >= minLength then
-				textNew = classicChat.insertlink(textNew, url);
+				textNew = g.insertlink(textNew, url);
 			end
 		end
 	end
@@ -428,18 +483,18 @@ function classicChat.processUrls(text)
 			and (colon == '' or port ~= '' and port + 0 < 65536)
 		then
 			if #url >= minLength then
-				textNew = classicChat.insertlink(textNew, url);
+				textNew = g.insertlink(textNew, url);
 			end
 		end
 	end
 	return textNew;
 end
 
-function classicChat.insertlink(text, url, urlDisplay)
+function g.insertlink(text, url, urlDisplay)
 	local maxLength = 28;
 
-	text = classicChat.escape(text);
-	url = classicChat.escape(url);
+	text = g.escape(text);
+	url = g.escape(url);
 	urlDisplay = urlDisplay or url;
 
 	local urlHttp = url;
@@ -447,28 +502,28 @@ function classicChat.insertlink(text, url, urlDisplay)
 		urlHttp = "http://" .. urlHttp;
 	end
 
-	if urlDisplay == classicChat.escape("https://classich.at") then
+	if urlDisplay == g.escape("https://classich.at") then
 		urlDisplay = "Classic Chat";
-		urlHttp = classicChat.escape("https://github.com/Miei/TOS-lua/");
+		urlHttp = g.escape("https://github.com/Miei/TOS-lua/");
 	end
 
 	if urlDisplay ~= url then
 		maxLength = 100;
 	end
 
-	local linkFormat = "{a SLL %s}{#%s}%s{/}{/}{/}";
+	local linkFormat = "{a SLL %s}{#%s}%s{/}{/}";
 
-	if #classicChat.unescape(urlDisplay) >= maxLength then
-		linkFormat = "{a SLL %s}{#%s}%s!@#DOT#@!!@#DOT#@!!@#DOT#@!{/}{/}{/}";
-		urlDisplay = classicChat.escape(classicChat.unescape(urlDisplay):sub(1, maxLength-3));
+	if #g.unescape(urlDisplay) >= maxLength then
+		linkFormat = "{a SLL %s}{#%s}%s!@#DOT#@!!@#DOT#@!!@#DOT#@!{/}{/}";
+		urlDisplay = g.escape(g.unescape(urlDisplay):sub(1, maxLength-3));
 	end
 
-	text = text:gsub(url, linkFormat:format(urlHttp, settings.chatColors.Link, urlDisplay));
+	text = text:gsub(url, linkFormat:format(urlHttp, g.settings.chatColors.Link, urlDisplay));
 
-	return classicChat.unescape(text);
+	return g.unescape(text);
 end
 
-function classicChat.escape(text)
+function g.escape(text)
 	text = text:gsub('[%%]','!@#PERCENT#@!');
 	text = text:gsub('[%+]','!@#PLUS#@!');
 	text = text:gsub('[%-]','!@#MINUS#@!');
@@ -481,7 +536,7 @@ function classicChat.escape(text)
 	return text:gsub('[%.]','!@#DOT#@!');
 end
 
-function classicChat.unescape(text)
+function g.unescape(text)
 	text = text:gsub('!@#PERCENT#@!', '%%');
 	text = text:gsub('!@#PLUS#@!', '%+');
 	text = text:gsub('!@#MINUS#@!', '%-');
@@ -495,7 +550,7 @@ function classicChat.unescape(text)
 end
 
 
-function classicChat.instertText(messageText, pattern, instertAfter, insertString)
+function g.instertText(messageText, pattern, instertAfter, insertString)
 	for word in messageText:gmatch(pattern) do
 
 		local messageTextSubstring = messageText:match(pattern);
@@ -509,7 +564,7 @@ function classicChat.instertText(messageText, pattern, instertAfter, insertStrin
 	return messageText;
 end
 
-function CLASSICCHAT_RESIZE_CHAT_CTRL(chatCtrl, label, txt, timeBox)
+function g.resizeChatCtrl(chatCtrl, label, txt, timeBox)
 	local groupBox = chatCtrl:GetParent();
 	local labelWidth = txt:GetWidth();
 	local chatWidth = groupBox:GetWidth();
@@ -518,7 +573,7 @@ function CLASSICCHAT_RESIZE_CHAT_CTRL(chatCtrl, label, txt, timeBox)
 	chatCtrl:Resize(chatWidth, label:GetY() + label:GetHeight());
 end
 
-function CLASSICCHAT_CHAT_SET_OPACITY(num)
+function g.chatSetOpacity(num)
 	local chatFrame = ui.GetFrame("chatframe");
 	if chatFrame == nil then
 		return;
@@ -554,7 +609,7 @@ end
 
 -- for debugging purposes
 local lastMessage = '';
-function classicChat.chatlog(text)
+function g.chatlog(text)
 	if lastMessage == text then
 		return;
 	end
@@ -568,25 +623,3 @@ function classicChat.chatlog(text)
 		 return true;
 	end
 end
-
-classicChat.isWhisperCooldown = false;
-
-local addon = classicChat["addon"];
-local frame = classicChat["frame"];
-
-_G["DRAW_CHAT_MSG"] = CLASSICCHAT_DRAW_CHAT_MSG;
-
-if classicChat.loaded ~= true then
-	_G["RESIZE_CHAT_CTRL"] = CLASSICCHAT_RESIZE_CHAT_CTRL;
-	_G["CHAT_SET_OPACITY"] = CLASSICCHAT_CHAT_SET_OPACITY;
-
-	if settings.urlMatching == true then
-		CHAT_SYSTEM("https://classich.at loaded!");
-	else
-		CHAT_SYSTEM("Classic Chat loaded!");
-	end
-
-	classicChat.loaded = true;
-end
-
-CLASSICCHAT_CHAT_SET_OPACITY(-1);
