@@ -48,6 +48,10 @@ function NOWPLAYING_3SEC()
 
 	if not g.loaded then
 		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		g.settings.notifyDuration = tonumber(g.settings.notifyDuration);
+		g.settings.showFrame = tonumber(g.settings.showFrame)
+		g.settings.onlyNotification = tonumber(g.settings.onlyNotification)
+		g.settings.chatMessage = tonumber(g.settings.chatMessage)
 
 		g.addon:RegisterMsg('FPS_UPDATE', 'NOWPLAYING_UPDATE_FRAME');
 
@@ -68,12 +72,18 @@ end
 function NOWPLAYING_UPDATE_FRAME()
 	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
 
-	if g.settings.showFrame ~= 1 then return end
+	if g.settings.showFrame ~= 1 then 
+		g.frame:ShowWindow(0);
+		return 
+	end
 	if imcSound.GetPlayingMusicInst() == nil then 
 		g.frame:ShowWindow(0);
 		return
 	end
-	if config.GetMusicVolume() == 0 then return end
+	if config.GetMusicVolume() == 0 then 
+		g.frame:ShowWindow(0);
+		return
+	end
 	if g.musicInst == imcSound.GetPlayingMusicInst() then return end
 
 	g.musicInst = imcSound.GetPlayingMusicInst();
@@ -139,6 +149,7 @@ function g.processCommand(words)
 		if cmd == 'on' then
 			g.settings.onlyNotification = 1;
 			CHAT_SYSTEM("[nowPlaying] Notify mode enabled");
+			g.frame:SetDuration(g.settings.notifyDuration);
 		elseif cmd == 'off' then
 			g.settings.onlyNotification = 0;
 			CHAT_SYSTEM("[nowPlaying] Notify mode disabled");
@@ -179,6 +190,10 @@ end
 function g.save()
 	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
 	local utils = _G["ADDONS"]["MIEI"]["utils"];
-	utils.save(g.settings, g.settings.settingsFileLoc, g.settingsComment);
-end
+	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
+	g.settings.notifyDuration = tonumber(g.settings.notifyDuration);
+	g.settings.showFrame = tonumber(g.settings.showFrame)
+	g.settings.onlyNotification = tonumber(g.settings.onlyNotification)
+	g.settings.chatMessage = tonumber(g.settings.chatMessage)
 
+end
