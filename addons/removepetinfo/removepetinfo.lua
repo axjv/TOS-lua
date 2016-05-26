@@ -36,14 +36,13 @@ function REMOVEPETINFO_3SEC()
 	if g.loaded ~= true then
 		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
 
-		utils.setupEvent(g.addon, "UPDATE_COMPANION_TITLE", "REMOVEPETINFO_UPDATE_COMPANION_TITLE")
-
 		utils.slashcommands['/comp'] = g.processCommand;
 		utils.slashcommands['/companion'] = g.processCommand;
 		CHAT_SYSTEM('[removePetInfo:help] /comp');
 
 		g.loaded = true;
 	end
+	utils.setupEvent(g.addon, "UPDATE_COMPANION_TITLE", "REMOVEPETINFO_UPDATE_COMPANION_TITLE")
 end
 
 function REMOVEPETINFO_UPDATE_COMPANION_TITLE(addonframe, eventMsg)
