@@ -103,7 +103,6 @@ g.settingsFileLoc = "../addons/miei/classicchat-settings.lua";
 -- INIT
 	g.addon:RegisterMsg("GAME_START_3SEC", "CLASSICCHAT_3SEC");
 
---CLASSICCHAT_3SEC();
 -- /INIT
 
 function CLASSICCHAT_3SEC()
@@ -140,7 +139,6 @@ function CLASSICCHAT_ON_UICHAT(addonframe, eventMsg)
 	local g = _G["ADDONS"]["MIEI"]["CLASSICCHAT"];
 	local utils = _G["ADDONS"]["MIEI"]["utils"];
 	if g.settings.closeChatOnSend == true then
-		CHAT_SYSTEM("called")
 		utils.closeChat();
 	end
 end

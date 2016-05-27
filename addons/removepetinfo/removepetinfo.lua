@@ -42,6 +42,7 @@ function REMOVEPETINFO_3SEC()
 
 		g.loaded = true;
 	end
+
 	utils.setupEvent(g.addon, "UPDATE_COMPANION_TITLE", "REMOVEPETINFO_UPDATE_COMPANION_TITLE")
 end
 
