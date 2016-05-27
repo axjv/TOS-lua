@@ -14,40 +14,27 @@ utils.addon:RegisterMsg("GAME_START_3SEC", "MIEI_UTILS_ON_GAME_START_3SEC");
 
 function MIEI_UTILS_ON_GAME_START_3SEC()
 	local utils = _G['ADDONS']['MIEI']['utils'];
-	g_uiChatHandler = "MIEI_UTILS_ON_UI_CHAT";
-	_G["TOURNAMENT_GAME"] = utils.tournamentGameHooked;
-end
-
-function utils.tournamentGameHooked(isPlaying)
-
-	local sysFrame = ui.GetFrame("sysmenu");
-	local frame = ui.GetFrame("tournament_view");
-	frame:SetUserValue("PLAYING", isPlaying);
-	if isPlaying == 1 then
-		frame:ShowWindow(0);
-		SYSMENU_DELETE_QUEUE_BTN(sysFrame, "TOURNAMENT_VIEW");
-		g_uiChatHandlerOn = nil;
-	else
-		-- frame:ShowWindow(1);
-
-		local btn = SYSMENU_CREATE_QUEUE_BTN(sysFrame, "TOURNAMENT_VIEW", "button_collection", 1);
-		local toggleScp = "ui.ToggleFrame('tournament_view')";
-		btn:SetEventScript(ui.LBUTTONUP, toggleScp);
-		g_uiChatHandlerOn = true;
-	end
+	utils.setupEvent(utils.addon, "ui.Chat", "MIEI_UTILS_ON_UI_CHAT");
 end
 
 -- alternate chat hooks to avoid conflict with cwapi and lkchat
 -- from cwapi
-function MIEI_UTILS_ON_UI_CHAT(msg)
+utils.ignore = {"/r","/w","/p","/y","/s","/g"};
+function MIEI_UTILS_ON_UI_CHAT(addonframe, eventMsg)
+	local utils = _G['ADDONS']['MIEI']['utils'];
+	local msg = utils.eventArgs(eventMsg);
 	local words = utils.splitString(msg);
 	local cmd = table.remove(words,1);
-
+	for i,v in ipairs(cwAPI.commands.ignoreCommonChatCommands) do
+		if (tostring(cmd) == tostring(v)) then
+			cmd = table.remove(words,1);
+			break;
+		end
+	end
 	local fn = utils.slashcommands[cmd];
 	if (fn ~= nil) then
+		utils.closeChat();
 		return fn(words);
-	elseif g_uiChatHandlerOn == true then
-		CHAT_TOURNAMENT(msg)
 	end
 end
 
@@ -61,6 +48,17 @@ function utils.splitString(s,type)
 	for word in s:gmatch(m) do table.insert(words, word) end
 	return words;
 end
+
+function utils.closeChat()
+	local chatFrame = GET_CHATFRAME();
+	local edit = chatFrame:GetChild('mainchat');
+
+	chatFrame:ShowWindow(0);
+	edit:ShowWindow(0);
+
+	ui.CloseFrame("chat_option");
+	ui.CloseFrame("chat_emoticon");
+end 
 
 -- http://lua-users.org/wiki/SaveTableToFile
 function utils.exportstring( s )
@@ -229,21 +227,24 @@ function utils.load( tbl, sfile, settingsComment )
 	return tbl;
 end
 
-function utils.setupEvent(myAddon, functionName, myFunctionName)
+
+function utils.setupEvent(myAddon, functionNameAbs, myFunctionName)
+	local functionName = string.gsub(functionNameAbs, "%.", "");
+
 	if _G['ADDONS']['EVENTS'][functionName .. "_OLD"] == nil then
-		_G['ADDONS']['EVENTS'][functionName .. "_OLD"] =  _G[functionName];
+		_G['ADDONS']['EVENTS'][functionName .. "_OLD"] = loadstring("return " .. functionNameAbs)();
 	end
 
-	local hookedFuncString = [[_G[']]..functionName..[['] = function(...)
+	local hookedFuncString = functionNameAbs ..[[ = function(...)
 		local function pack2(...) return {n=select('#', ...), ...} end
 		local thisFuncName = "]]..functionName..[[";
 		local result = pack2(pcall(_G['ADDONS']['EVENTS'][thisFuncName .. '_OLD'], ...));
 		_G['ADDONS']['EVENTS']['ARGS'][thisFuncName] = {...};
 		imcAddOn.BroadMsg(thisFuncName);
-		return unpack(result, i, result.n);
+		return unpack(result, 2, result.n);
 	end
 	]];
-	
+
 	pcall(loadstring(hookedFuncString));
 
 	myAddon:RegisterMsg(functionName, myFunctionName);
@@ -252,4 +253,3 @@ end
 function utils.eventArgs(eventMsg)
 	return unpack(_G['ADDONS']['EVENTS']['ARGS'][eventMsg]);
 end
-

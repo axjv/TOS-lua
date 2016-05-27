@@ -10,11 +10,12 @@ if not g.loaded then
 	g.settings = {
 		boldSender = true;
 		channelTag = false;
+		closeChatOnSend = true;
 		hideSystemName = true;
 		urlClickWarning = true;
 		timeStamp = true;
 		urlMatching = true;	
-		version = 0.1;
+		version = 0.2;
 	};
 
 	g.settings.whisperSound = {
@@ -101,6 +102,8 @@ g.settingsFileLoc = "../addons/miei/classicchat-settings.lua";
 
 -- INIT
 	g.addon:RegisterMsg("GAME_START_3SEC", "CLASSICCHAT_3SEC");
+
+--CLASSICCHAT_3SEC();
 -- /INIT
 
 function CLASSICCHAT_3SEC()
@@ -125,9 +128,21 @@ function CLASSICCHAT_3SEC()
 	_G["RESIZE_CHAT_CTRL"] = g.resizeChatCtrl;
 	_G["CHAT_SET_OPACITY"] = g.chatSetOpacity;
 	
+	utils.setupEvent(g.addon, "ui.Chat", "CLASSICCHAT_ON_UICHAT");
+
 	g.isWhisperCooldown = false;
 
 	g.chatSetOpacity(-1);
+end
+
+
+function CLASSICCHAT_ON_UICHAT(addonframe, eventMsg)
+	local g = _G["ADDONS"]["MIEI"]["CLASSICCHAT"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	if g.settings.closeChatOnSend == true then
+		CHAT_SYSTEM("called")
+		utils.closeChat();
+	end
 end
 
 function g.drawChatMsg(groupBoxName, size, startIndex, frameName)
@@ -299,8 +314,7 @@ function g.drawChatMsg(groupBoxName, size, startIndex, frameName)
 			local messageTextSubstring = itemID .. "}{#0000FF}";
 			local itemObj = CreateIESByID("Item", tonumber(itemID));
 			local itemColor = g.settings.itemColors[itemObj.ItemGrade];
-
-			if tostring(itemObj.ItemGrade) == "None" then 			--recipes do not hold an itemgrade
+			if itemObj.GroupName == "Recipe" then 					--recipes do not hold an itemgrade
 				local recipeGrade = itemIcon:match("misc(%d)"); 	-- e.g icon_item_gloves_misc[1-5]
 				if recipeGrade ~= nil then
 					itemColor = g.settings.itemColors[tonumber(recipeGrade)-1];
