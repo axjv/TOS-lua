@@ -2,7 +2,6 @@
 -- more research into whether filtering by owner is possible.. currently shows drops for any owner
 	-- timer until someone else' (grayed out) item becomes available to everyone
 -- find out why drops are sometimes not detected
--- better effects
 -- custom sounds by rarity upon drop
 -- settings ui or slash commands
 
@@ -32,30 +31,36 @@ g.itemGrades = {
 	"rare", 		-- blue item
 	"epic", 		-- purple item
 	"legendary", 	-- orange item
+	"set",			-- set piece
 };
 
 --F_light080_blue_loop
---
+--F_magic_prison_line_orange
+--F_cleric_MagnusExorcismus_shot_burstup
 
 g.settings.effects ={
 	["common"] = {
-		name = "F_cleric_MagnusExorcismus_shot_burstup";
-		scale = 2.5;
+		name = "F_magic_prison_line_white";
+		scale = 6;
 	};
 
 	["rare"] = {
-		name = "F_cleric_MagnusExorcismus_shot_burstup";
-		scale = 2.5;
+		name = "F_magic_prison_line_blue";
+		scale = 6;
 	};
 
 	["epic"] = {
-		name = "F_cleric_MagnusExorcismus_shot_burstup";
-		scale = 2.5;
+		name = "F_magic_prison_line_dark";
+		scale = 6;
 	};
 
 	["legendary"] = {
-		name = "F_cleric_MagnusExorcismus_shot_burstup";
-		scale = 2.5;
+		name = "F_magic_prison_line_red";
+		scale = 6;
+	};
+	["set"] = {
+		name = "F_magic_prison_line_green";
+		scale = 6;
 	};
 }
 
@@ -71,25 +76,27 @@ function ITEMDROPS_ON_MON_ENTER_SCENE(frame, msg, str, handle)
 		for i = 1, selectedObjectsCount do
 			if GetHandle(selectedObjects[i]) == handle then
 
-				local itemobj = GetClass("Item", selectedObjects[i].ClassName);
+				local itemObj = GetClass("Item", selectedObjects[i].ClassName);
 				local itemName = actor:GetName();
 				local itemGrade = nil;
 				local groupName = nil;
 				local alwaysShow = false;
 
-				if itemobj ~= nil then
-					groupName = itemobj.GroupName;
-					itemGrade = itemobj.ItemGrade;
-					itemName = GET_FULL_NAME(itemobj);
+				if itemObj ~= nil then
+					groupName = itemObj.GroupName;
+					itemGrade = itemObj.ItemGrade;
+					itemName = GET_FULL_NAME(itemObj);
+					local itemProp = geItemTable.GetProp(itemObj.ClassID);
 
 					if groupName == "Recipe" then
-						itemGrade = tonumber(GET_ITEM_ICON_IMAGE(itemobj):match("misc(%d)"))-1;
+						itemGrade = itemObj.Icon:match("misc(%d)")-1;
 					elseif groupName == "Gem" and g.settings.alwaysShowGems == true then
 						alwaysShow = true;
 					elseif groupName == "Card" and g.settings.alwaysShowCards == true then
 						alwaysShow = true;
-					end
-					if tostring(itemGrade) == "None" then
+					elseif (itemProp.setInfo ~= nil) then 
+						itemGrade = 5; -- set piece, credits TehSeph
+					elseif tostring(itemGrade) == "None" then
 						itemGrade = 1;
 					end
 				end
@@ -99,12 +106,12 @@ function ITEMDROPS_ON_MON_ENTER_SCENE(frame, msg, str, handle)
 					if g.settings.nameTagFilterGrade ~= "off" then
 						CHAT_SYSTEM("[itemDrops] invalid name tag filter grade");
 					end
-				elseif itemobj == nil or filterGradeIndex <= itemGrade or alwaysShow == true then
-					if itemobj == nil and g.settings.showSilverNameTag ~= true then return end
+				elseif itemObj == nil or filterGradeIndex <= itemGrade or alwaysShow == true then
+					if itemObj == nil and g.settings.showSilverNameTag ~= true then return end
 					g.drawItemFrame(handle, itemName);
 				end
 
-				if itemobj ~= nil then
+				if itemObj ~= nil then
 					local itemGradeMsg = g.itemGrades[itemGrade];
 					filterGradeIndex = g.indexOf(g.itemGrades, g.settings.effectFilterGrade);
 					if filterGradeIndex == nil and alwaysShow ~= true then
@@ -133,7 +140,7 @@ function ITEMDROPS_ON_MON_ENTER_SCENE(frame, msg, str, handle)
 						if g.settings.showGrade ~= true then
 							itemGradeMsg = '';
 						end
-						CHAT_SYSTEM(string.format("Dropped%s%s %s", itemGradeMsg, groupNameMsg, g.linkitem(itemobj)));
+						CHAT_SYSTEM(string.format("Dropped%s%s %s", itemGradeMsg, groupNameMsg, g.linkitem(itemObj)));
 					end
 				end 
 			end
@@ -163,33 +170,33 @@ function g.drawItemFrame(handle, itemName)
 	itemFrame:ShowWindow(1);
 end
 
-function g.linkitem(itemobj)
+function g.linkitem(itemObj)
 	local imgheight = 30;
 	local imgtag =  "";
-	local imageName = GET_ITEM_ICON_IMAGE(itemobj);
+	local imageName = GET_ITEM_ICON_IMAGE(itemObj);
 	local imgtag = string.format("{img %s %d %d}", imageName, imgheight, imgheight);
 	local properties = "";
-	local itemName = GET_FULL_NAME(itemobj);
+	local itemName = GET_FULL_NAME(itemObj);
 
-	if tostring(itemobj.RefreshScp) ~= "None" then
-		_G[itemobj.RefreshScp](itemobj);
+	if tostring(itemObj.RefreshScp) ~= "None" then
+		_G[itemObj.RefreshScp](itemObj);
 	end
 
-	if itemobj.ClassName == 'Scroll_SkillItem' then		
-		local sklCls = GetClassByType("Skill", itemobj.SkillType)
+	if itemObj.ClassName == 'Scroll_SkillItem' then		
+		local sklCls = GetClassByType("Skill", itemObj.SkillType)
 		itemName = itemName .. "(" .. sklCls.Name ..")";
-		properties = GetSkillItemProperiesString(itemobj);
+		properties = GetSkillItemProperiesString(itemObj);
 	else
-		properties = GetModifiedProperiesString(itemobj);
+		properties = GetModifiedProperiesString(itemObj);
 	end
 
 	if properties == "" then
 		properties = 'nullval'
 	end
 
-	local itemrank_num = itemobj.ItemStar
+	local itemrank_num = itemObj.ItemStar
 
-	return string.format("{a SLI %s %d}{#0000FF}%s%s{/}{/}{/}", properties, itemobj.ClassID, imgtag, itemName);
+	return string.format("{a SLI %s %d}{#0000FF}%s%s{/}{/}{/}", properties, itemObj.ClassID, imgtag, itemName);
 end
 
 function g.indexOf( t, object )
