@@ -1,7 +1,11 @@
 -- todo: 
 -- more research into whether filtering by owner is possible.. currently shows drops for any owner
+	-- timer until someone else' (grayed out) item becomes available to everyone
 -- find out why drops are sometimes not detected
 -- better effects
+-- custom sounds by rarity upon drop
+-- settings ui or slash commands
+
 
 -- use with https://github.com/TehSeph/tos-addons "Colored Item Names" for colored drop nametags
 
