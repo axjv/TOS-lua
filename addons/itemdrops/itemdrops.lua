@@ -3,8 +3,6 @@
 	-- timer until someone else' (grayed out) item becomes available to everyone
 -- find out why drops are sometimes not detected
 -- custom sounds by rarity upon drop
--- settings ui or slash commands
-
 
 -- use with https://github.com/TehSeph/tos-addons "Colored Item Names" for colored drop nametags
 
@@ -15,56 +13,101 @@ _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 local g = _G['ADDONS']['MIEI'][addonName];
 
-g.settings = {
-	showGrade = true;				-- show item grade as text in the drop msg?
-	showGroupName = true;			-- show item group name (e.g. "Recipe") in the drop msg?
-	msgFilterGrade = "common";		-- only show messages for items of this grade and above, "common" applies msgs to all objects, "off" means msgs will be off
-	effectFilterGrade = "common";	-- only draw effects for items of this grade and above, , "common" applies effects to all objects, "off" means effects will be off
-	nameTagFilterGrade = "common";	-- only display name tag (as if you were pressing alt) for items of this grade and above, "common" applies to all objects, "off" means name tags will be off
-	alwaysShowCards = true;			-- always show effects and msgs for exp cards
-	alwaysShowGems = true;			-- always show effects and msgs for gems
-	showSilverNameTag = true;		-- item name tags for silver drops
-}
+if not g.loaded then
+	g.settings = {
+		showGrade = true;				-- show item grade as text in the drop msg?
+		showGroupName = true;			-- show item group name (e.g. "Recipe") in the drop msg?
+		msgFilterGrade = "common";		-- only show messages for items of this grade and above, "common" applies msgs to all objects, "off" means msgs will be off
+		effectFilterGrade = "common";	-- only draw effects for items of this grade and above, , "common" applies effects to all objects, "off" means effects will be off
+		nameTagFilterGrade = "common";	-- only display name tag (as if you were pressing alt) for items of this grade and above, "common" applies to all objects, "off" means name tags will be off
+		alwaysShowCards = true;			-- always show effects and msgs for exp cards
+		alwaysShowGems = true;			-- always show effects and msgs for gems
+		showSilverNameTag = false;		-- item name tags for silver drops
+	}
 
-g.itemGrades = {
-	"common",	 	-- white item
-	"rare", 		-- blue item
-	"epic", 		-- purple item
-	"legendary", 	-- orange item
-	"set",			-- set piece
-};
-
---F_light080_blue_loop
---F_magic_prison_line_orange
---F_cleric_MagnusExorcismus_shot_burstup
-
-g.settings.effects ={
-	["common"] = {
-		name = "F_magic_prison_line_white";
-		scale = 6;
+	g.itemGrades = {
+		"common",	 	-- white item
+		"rare", 		-- blue item
+		"epic", 		-- purple item
+		"legendary", 	-- orange item
+		"set",			-- set piece
 	};
 
-	["rare"] = {
-		name = "F_magic_prison_line_blue";
-		scale = 6;
-	};
+	--F_light080_blue_loop
+	--F_cleric_MagnusExorcismus_shot_burstup
+	--F_magic_prison_line
 
-	["epic"] = {
-		name = "F_magic_prison_line_dark";
-		scale = 6;
-	};
+	g.settings.effects ={
+		["common"] = {
+			name = "F_magic_prison_line_white";
+			scale = 6;
+		};
 
-	["legendary"] = {
-		name = "F_magic_prison_line_red";
-		scale = 6;
-	};
-	["set"] = {
-		name = "F_magic_prison_line_green";
-		scale = 6;
-	};
-}
+		["rare"] = {
+			name = "F_magic_prison_line_blue";
+			scale = 6;
+		};
 
-g.addon:RegisterMsg("MON_ENTER_SCENE", "ITEMDROPS_ON_MON_ENTER_SCENE")
+		["epic"] = {
+			name = "F_magic_prison_line_dark";
+			scale = 6;
+		};
+
+		["legendary"] = {
+			name = "F_magic_prison_line_red";
+			scale = 6;
+		};
+		["set"] = {
+			name = "F_magic_prison_line_green";
+			scale = 6;
+		};
+	}
+end
+
+g.settingsComment = [[%s
+ Item Drops by Miei, settings file
+ http://github.com/Miei/TOS-lua
+
+showGrade			- show item grade as text in the drop msg?
+showGroupName		- show item group name (e.g. "Recipe") in the drop msg?
+
+msgFilterGrade		- only show messages for items of this grade and above, "common" applies msgs to all objects, "off" means msgs will be off
+effectFilterGrade	- accepts "common", "rare", "epic", "legendary", "set", "off"
+nameTagFilterGrade	- same as above two options but for name tags under items
+
+alwaysShowCards		- always show effects and msgs for exp cards
+alwaysShowGems		- always show effects and msgs for gems
+
+showSilverNameTag	- item name tags for silver drops
+
+%s
+
+]];
+
+g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
+g.settingsFileLoc = "../addons/miei/itemdrops-settings.lua";
+
+--on init
+
+
+--/init
+
+-- INIT
+	g.addon:RegisterMsg("GAME_START_3SEC", "ITEMDROPS_3SEC");
+-- /INIT
+
+function ITEMDROPS_3SEC()
+	local g = _G["ADDONS"]["MIEI"]["ITEMDROPS"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
+
+	if g.loaded ~= true then
+		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		CHAT_SYSTEM('[itemDrops:help] /drops');
+		g.loaded = true;
+	end
+	utils.slashcommands['/drops'] = g.processCommand;
+	g.addon:RegisterMsg("MON_ENTER_SCENE", "ITEMDROPS_ON_MON_ENTER_SCENE")
+end
 
 function ITEMDROPS_ON_MON_ENTER_SCENE(frame, msg, str, handle)
 	local g = _G['ADDONS']['MIEI']['ITEMDROPS'];
@@ -197,6 +240,133 @@ function g.linkitem(itemObj)
 	local itemrank_num = itemObj.ItemStar
 
 	return string.format("{a SLI %s %d}{#0000FF}%s%s{/}{/}{/}", properties, itemObj.ClassID, imgtag, itemName);
+end
+
+
+function g.processCommand(words)
+	local g = _G["ADDONS"]["MIEI"]["ITEMDROPS"];
+	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	local cmd = table.remove(words,1);
+	local validFilterGrades = 'common, rare, epic, legendary, set, off';
+
+	if not cmd then
+		local msg = 'Item Drops{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops cards on/off{nl}';
+		msg = msg .. 'Enable/disable always showing xp card drops.{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops gems on/off{nl}';
+		msg = msg .. 'Enable/disable always showing gem drops.{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops silver on/off{nl}';
+		msg = msg .. 'Enable/disable showing name tag for silver.{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops msg [grade]{nl}';
+		msg = msg .. 'Set the filter grade for chat messages{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops fx [grade]{nl}';
+		msg = msg .. 'Set the filter grade for effects on dropped items{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops name [grade]{nl}';
+		msg = msg .. 'Set the filter grade for item name tags{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. '/drops filter [grade]{nl}'
+		msg = msg .. 'Set ALL filters to the specified item grade.{nl}';
+		msg = msg .. '-----------{nl}';
+		msg = msg .. 'Filter [grade] can be any of the following:{nl}';
+		msg = msg .. validFilterGrades .. '{nl}';
+		msg = msg .. 'With off meaning that the feature will be disabled.'
+
+		return ui.MsgBox(msg,"","Nope");
+
+	elseif cmd == 'cards' then
+		cmd = table.remove(words,1);
+		if cmd == 'on' then
+			g.settings.alwaysShowCards = true;
+			CHAT_SYSTEM("[itemDrops] Always show card drops enabled.")
+		elseif cmd == 'off' then
+			g.settings.alwaysShowCards = false;
+			CHAT_SYSTEM("[itemDrops] Always show card drops disabled.")
+		end
+
+	elseif cmd == 'gems' then
+		cmd = table.remove(words,1);
+		if cmd == 'on' then
+			g.settings.alwaysShowGems = true;
+			CHAT_SYSTEM("[itemDrops] Always show gem drops enabled.")
+		elseif cmd == 'off' then
+			g.settings.alwaysShowGems = false;
+			CHAT_SYSTEM("[itemDrops] Always show gem drops disabled.")
+		end
+
+	elseif cmd == 'silver' then
+		cmd = table.remove(words,1);
+		if cmd == 'on' then
+			g.settings.showSilverNameTag = true;
+			CHAT_SYSTEM("[itemDrops] Showing silver name tags.")
+		elseif cmd == 'off' then
+			g.settings.showSilverNameTag = false;
+			CHAT_SYSTEM("[itemDrops] Hiding silver name tags.")
+		end
+
+	elseif cmd == 'filter' then
+		cmd = table.remove(words,1);
+		if g.checkFilterGrade(cmd) == true then -- check if valid filter grade
+			g.settings.msgFilterGrade = cmd;
+			g.settings.effectFilterGrade = cmd;
+			g.settings.nameTagFilterGradee = cmd;
+			CHAT_SYSTEM("[itemDrops] Setting all filters to: " .. cmd)
+		else
+			CHAT_SYSTEM("[itemDrops] Invalid filter grade. Valid filter grades are:");
+			CHAT_SYSTEM(validFilterGrades);
+		end
+
+	elseif cmd == 'msg' then
+		cmd = table.remove(words,1);
+		if g.checkFilterGrade(cmd) == true then -- check if valid filter grade
+			g.settings.msgFilterGrade = cmd;
+			CHAT_SYSTEM("[itemDrops] Message filter set to: " .. cmd)
+		else
+			CHAT_SYSTEM("[itemDrops] Invalid filter grade. Valid filter grades are:");
+			CHAT_SYSTEM(validFilterGrades);
+		end
+
+	elseif cmd == 'fx' then
+		cmd = table.remove(words,1);
+		if g.checkFilterGrade(cmd) == true then -- check if valid filter grade
+			g.settings.effectFilterGrade = cmd;
+			CHAT_SYSTEM("[itemDrops] Effect filter set to: " .. cmd)
+		else
+			CHAT_SYSTEM("[itemDrops] Invalid filter grade. Valid filter grades are:");
+			CHAT_SYSTEM(validFilterGrades);
+		end
+
+	elseif cmd == 'name' then
+		cmd = table.remove(words,1);
+		if g.checkFilterGrade(cmd) == true then -- check if valid filter grade
+			g.settings.nameTagFilterGrade = cmd;
+			CHAT_SYSTEM("[itemDrops] Name tag filter set to: " .. cmd)
+		else
+			CHAT_SYSTEM("[itemDrops] Invalid filter grade. Valid filter grades are:");
+			CHAT_SYSTEM(validFilterGrades);
+		end
+
+
+	else
+		CHAT_SYSTEM('[itemDrops] Invalid input. Type "/drops" for help.');
+	end
+	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
+end
+
+
+function g.checkFilterGrade(text)
+	if g.indexOf(g.itemGrades, text) ~= nil then
+		return true;
+	elseif text == "off" then
+		return true;
+	else 
+		return false;
+	end
 end
 
 function g.indexOf( t, object )
