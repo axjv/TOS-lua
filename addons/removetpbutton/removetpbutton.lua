@@ -11,10 +11,10 @@ g.addon:RegisterMsg("GAME_START_3SEC", "REMOVETPBUTTON_3SEC");
 
 function REMOVETPBUTTON_3SEC()
 	local g = _G["ADDONS"]["MIEI"]["REMOVETPBUTTON"];
-	local utils = _G['ADDONS']['MIEI']['utils'];
+	local acutil = require('acutil');
 
 	if g.loaded ~= true then
-		utils.slashcommands['/tp'] = g.processCommand;
+		acutil.slashCommand('/tp', g.processCommand);
 		CHAT_SYSTEM('[removeTPButton:help] /tp');
 
 		g.loaded = true;
@@ -24,8 +24,7 @@ function REMOVETPBUTTON_3SEC()
 end
 
 function g.processCommand(words)
-	local g = _G["ADDONS"]["MIEI"]["REMOVETPBUTTON"];
-	local cmd = table.remove(words,1);
+	--local cmd = table.remove(words,1);
 
 	ui.OpenFrame('simpleingameshop');
 end

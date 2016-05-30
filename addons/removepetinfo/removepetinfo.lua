@@ -4,6 +4,7 @@ _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
 local g = _G["ADDONS"]["MIEI"][addonName];
+local acutil = require('acutil');
 if g.loaded ~= true then
 	g.settings = {
 		showMyPetName = 1;
@@ -22,7 +23,7 @@ http://github.com/Miei/TOS-lua
 ]];
 
 g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
-g.settingsFileLoc = '../addons/miei/removepetinfo-settings.lua';
+g.settingsFileLoc = '../addons/removepetinfo/settings.json';
 
 
 -- INIT
@@ -31,25 +32,29 @@ g.settingsFileLoc = '../addons/miei/removepetinfo-settings.lua';
 
 function REMOVEPETINFO_3SEC()
 	local g = _G["ADDONS"]["MIEI"]["REMOVEPETINFO"];
-	local utils = _G['ADDONS']['MIEI']['utils'];
+	local acutil =  require('acutil');
 
 	if g.loaded ~= true then
-		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		local t, err = acutil.loadJSON(g.settingsFileLoc, g.settings);
+		if err then
+			acutil.saveJSON(g.settingsFileLoc, g.settings);
+		else
+			g.settings = t;
+		end
 
-		utils.slashcommands['/comp'] = g.processCommand;
-		utils.slashcommands['/companion'] = g.processCommand;
+		acutil.slashCommand('/comp', g.processCommand)
+		acutil.slashCommand('/companion', g.processCommand);
 		CHAT_SYSTEM('[removePetInfo:help] /comp');
 
 		g.loaded = true;
 	end
 
-	utils.setupEvent(g.addon, "UPDATE_COMPANION_TITLE", "REMOVEPETINFO_UPDATE_COMPANION_TITLE")
+	acutil.setupEvent(g.addon, "UPDATE_COMPANION_TITLE", "REMOVEPETINFO_UPDATE_COMPANION_TITLE")
 end
 
 function REMOVEPETINFO_UPDATE_COMPANION_TITLE(addonframe, eventMsg)
 	local g = _G["ADDONS"]["MIEI"]["REMOVEPETINFO"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
-	local frame, handle = utils.eventArgs(eventMsg);
+	local frame, handle = acutil.getEventArgs(eventMsg);
 
 	frame = tolua.cast(frame, "ui::CObject");
 
@@ -80,8 +85,6 @@ end
 
 
 function g.processCommand(words)
-	local g = _G["ADDONS"]["MIEI"]["REMOVEPETINFO"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
 	local cmd = table.remove(words,1);
 
 	if not cmd then
@@ -133,5 +136,5 @@ function g.processCommand(words)
 	else
 		CHAT_SYSTEM('[removePetInfo] Invalid input. Type "/companion" for help.');
 	end
-	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
+	acutil.saveJSON(g.settingsFileLoc, g.settings);
 end

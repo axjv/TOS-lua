@@ -5,10 +5,10 @@ _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
 local g = _G['ADDONS']['MIEI'][addonName];
+local acutil = require('acutil');
 if g.loaded ~= true then
 	g.settings = {
 		showFPSCounter = false;
-		version = 0.1;
 	};
 end
 
@@ -21,7 +21,7 @@ http://github.com/Miei/TOS-lua
 ]];
 
 g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
-g.settingsFileLoc = '../addons/miei/removefpscounter-settings.lua';
+g.settingsFileLoc = '../addons/removefpscounter/settings.json';
 
 -- INIT
 g.addon:RegisterMsg("GAME_START_3SEC", "REMOVEFPSCOUNTER_ON_3SEC")
@@ -30,14 +30,17 @@ g.addon:RegisterMsg("GAME_START_3SEC", "REMOVEFPSCOUNTER_ON_3SEC")
 
 function REMOVEFPSCOUNTER_ON_3SEC()
 	local g = _G["ADDONS"]["MIEI"]["REMOVEFPSCOUNTER"];
-	local utils = _G['ADDONS']['MIEI']['utils'];
+	local acutil = require('acutil');
 
-
-	-- on 3sec
 	if g.loaded ~= true then
-		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		local t, err = acutil.loadJSON(g.settingsFileLoc, g.settings);
+		if err then
+			acutil.saveJSON(g.settingsFileLoc, g.settings);
+		else
+			g.settings = t;
+		end
 
-		utils.slashcommands['/fps'] = g.processCommand;
+		acutil.slashCommand('/fps', g.processCommand);
 		CHAT_SYSTEM('[removeFPSCounter:help] /fps');
 
 		g.loaded = true;
@@ -48,8 +51,6 @@ function REMOVEFPSCOUNTER_ON_3SEC()
 end
 
 function g.processCommand(words)
-	local g = _G["ADDONS"]["MIEI"]["REMOVEFPSCOUNTER"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
 	local cmd = table.remove(words,1);
 
 	if g.settings.showFPSCounter == true then
@@ -62,5 +63,5 @@ function g.processCommand(words)
 		CHAT_SYSTEM("[removeFPSCounter] Showing FPS counter.")
 	end
 
-	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
+	acutil.saveJSON(g.settingsFileLoc, g.settings);
 end

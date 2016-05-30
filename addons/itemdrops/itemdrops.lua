@@ -1,8 +1,10 @@
--- todo: 
--- more research into whether filtering by owner is possible.. currently shows drops for any owner
-	-- timer until someone else' (grayed out) item becomes available to everyone
+-- todo:
+-- timer until someone else' (grayed out) item becomes available to everyone
 -- find out why drops are sometimes not detected
 -- custom sounds by rarity upon drop
+-- seperate settings for other people's drops
+-- add option for party drops
+-- custom frame to customize settings
 
 -- use with https://github.com/TehSeph/tos-addons "Colored Item Names" for colored drop nametags
 
@@ -12,17 +14,19 @@ _G['ADDONS'] = _G['ADDONS'] or {};
 _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 local g = _G['ADDONS']['MIEI'][addonName];
+local acutil = require('acutil');
 
 if not g.loaded then
 	g.settings = {
 		showGrade = true;				-- show item grade as text in the drop msg?
 		showGroupName = true;			-- show item group name (e.g. "Recipe") in the drop msg?
-		msgFilterGrade = "common";		-- only show messages for items of this grade and above, "common" applies msgs to all objects, "off" means msgs will be off
+		msgFilterGrade = "rare";		-- only show messages for items of this grade and above, "common" applies msgs to all objects, "off" means msgs will be off
 		effectFilterGrade = "common";	-- only draw effects for items of this grade and above, , "common" applies effects to all objects, "off" means effects will be off
 		nameTagFilterGrade = "common";	-- only display name tag (as if you were pressing alt) for items of this grade and above, "common" applies to all objects, "off" means name tags will be off
 		alwaysShowCards = true;			-- always show effects and msgs for exp cards
 		alwaysShowGems = true;			-- always show effects and msgs for gems
 		showSilverNameTag = false;		-- item name tags for silver drops
+		onlyMyDrops = true;
 	}
 
 	g.itemGrades = {
@@ -85,28 +89,27 @@ showSilverNameTag	- item name tags for silver drops
 ]];
 
 g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
-g.settingsFileLoc = "../addons/miei/itemdrops-settings.lua";
+g.settingsFileLoc = "../addons/itemdrops/settings.json";
 
---on init
-
-
---/init
-
--- INIT
-	g.addon:RegisterMsg("GAME_START_3SEC", "ITEMDROPS_3SEC");
--- /INIT
 
 function ITEMDROPS_3SEC()
 	local g = _G["ADDONS"]["MIEI"]["ITEMDROPS"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	local acutil = require('acutil');
 
-	if g.loaded ~= true then
-		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+	acutil.slashCommand('/drops', g.processCommand)
+	g.addon:RegisterMsg("MON_ENTER_SCENE", "ITEMDROPS_ON_MON_ENTER_SCENE")
+
+	if not g.loaded then
+		local t, err = acutil.loadJSON(g.settingsFileLoc, g.settings);
+		if err then
+			acutil.saveJSON(g.settingsFileLoc, g.settings);
+		else
+			g.settings = t;
+		end
 		CHAT_SYSTEM('[itemDrops:help] /drops');
 		g.loaded = true;
 	end
-	utils.slashcommands['/drops'] = g.processCommand;
-	g.addon:RegisterMsg("MON_ENTER_SCENE", "ITEMDROPS_ON_MON_ENTER_SCENE")
+	g.AID = session.loginInfo.GetAID();
 end
 
 function ITEMDROPS_ON_MON_ENTER_SCENE(frame, msg, str, handle)
@@ -118,76 +121,94 @@ function ITEMDROPS_ON_MON_ENTER_SCENE(frame, msg, str, handle)
 		local selectedObjects, selectedObjectsCount = SelectObject(GetMyPCObject(), 100000, 'ALL');
 		for i = 1, selectedObjectsCount do
 			if GetHandle(selectedObjects[i]) == handle then
+				if g.settings.onlyMyDrops ~= true or actor:GetUniqueName() == g.AID then
+					local itemObj = GetClass("Item", selectedObjects[i].ClassName);
+					local itemName = actor:GetName();
+					local itemGrade = nil;
+					local groupName = nil;
+					local alwaysShow = false;
 
-				local itemObj = GetClass("Item", selectedObjects[i].ClassName);
-				local itemName = actor:GetName();
-				local itemGrade = nil;
-				local groupName = nil;
-				local alwaysShow = false;
+					if itemObj ~= nil then
+						groupName = itemObj.GroupName;
+						itemGrade = itemObj.ItemGrade;
+						itemName = GET_FULL_NAME(itemObj);
+						local itemProp = geItemTable.GetProp(itemObj.ClassID);
 
-				if itemObj ~= nil then
-					groupName = itemObj.GroupName;
-					itemGrade = itemObj.ItemGrade;
-					itemName = GET_FULL_NAME(itemObj);
-					local itemProp = geItemTable.GetProp(itemObj.ClassID);
-
-					if groupName == "Recipe" then
-						itemGrade = itemObj.Icon:match("misc(%d)")-1;
-					elseif groupName == "Gem" and g.settings.alwaysShowGems == true then
-						alwaysShow = true;
-					elseif groupName == "Card" and g.settings.alwaysShowCards == true then
-						alwaysShow = true;
-					elseif (itemProp.setInfo ~= nil) then 
-						itemGrade = 5; -- set piece, credits TehSeph
-					elseif tostring(itemGrade) == "None" then
-						itemGrade = 1;
+						if groupName == "Recipe" then
+							itemGrade = itemObj.Icon:match("misc(%d)")-1;
+						elseif groupName == "Gem" and g.settings.alwaysShowGems == true then
+							alwaysShow = true;
+						elseif groupName == "Card" and g.settings.alwaysShowCards == true then
+							alwaysShow = true;
+						elseif (itemProp.setInfo ~= nil) then 
+							itemGrade = 5; -- set piece, credits TehSeph
+						elseif tostring(itemGrade) == "None" then
+							itemGrade = 1;
+						end
 					end
-				end
 
-				local filterGradeIndex = g.indexOf(g.itemGrades, g.settings.nameTagFilterGrade);
-				if filterGradeIndex == nil and alwaysShow ~= true then
-					if g.settings.nameTagFilterGrade ~= "off" then
-						CHAT_SYSTEM("[itemDrops] invalid name tag filter grade");
-					end
-				elseif itemObj == nil or filterGradeIndex <= itemGrade or alwaysShow == true then
-					if itemObj == nil and g.settings.showSilverNameTag ~= true then return end
-					g.drawItemFrame(handle, itemName);
-				end
-
-				if itemObj ~= nil then
-					local itemGradeMsg = g.itemGrades[itemGrade];
-					filterGradeIndex = g.indexOf(g.itemGrades, g.settings.effectFilterGrade);
+					local filterGradeIndex = g.indexOf(g.itemGrades, g.settings.nameTagFilterGrade);
 					if filterGradeIndex == nil and alwaysShow ~= true then
-						if g.settings.effectFilterGrade ~= "off" then
-							CHAT_SYSTEM("[itemDrops] invalid effect filter grade");
+						if g.settings.nameTagFilterGrade ~= "off" then
+							CHAT_SYSTEM("[itemDrops] invalid name tag filter grade");
 						end
-					elseif filterGradeIndex <= itemGrade or alwaysShow == true then
-						local effect = g.settings.effects[itemGradeMsg];
-						-- delay to allow the actor to finish it's falling animation..
-						ReserveScript(string.format('pcall(effect.AddActorEffectByOffset(world.GetActor(%d) or 0, "%s", %d, 0))', handle, effect.name, effect.scale), 0.7);
+					elseif itemObj == nil or filterGradeIndex <= itemGrade or alwaysShow == true then
+						if itemObj == nil and g.settings.showSilverNameTag ~= true then return end
+						g.drawItemFrame(handle, itemName);
 					end
 
-					filterGradeIndex = g.indexOf(g.itemGrades, g.settings.msgFilterGrade);
+					if itemObj ~= nil then
+						local itemGradeMsg = g.itemGrades[itemGrade];
+						filterGradeIndex = g.indexOf(g.itemGrades, g.settings.effectFilterGrade);
+						if filterGradeIndex == nil and alwaysShow ~= true then
+							if g.settings.effectFilterGrade ~= "off" then
+								CHAT_SYSTEM("[itemDrops] invalid effect filter grade");
+							end
+						elseif filterGradeIndex <= itemGrade or alwaysShow == true then
+							local effect = g.settings.effects[itemGradeMsg];
+							-- delay to allow the actor to finish it's falling animation..
+							ReserveScript(string.format('pcall(effect.AddActorEffectByOffset(world.GetActor(%d) or 0, "%s", %d, 0))', handle, effect.name, effect.scale), 0.7);
+						end
 
-					if filterGradeIndex == nil and alwaysShow ~= true then
-						if g.settings.msgFilterGrade ~= "off" then
-							CHAT_SYSTEM("[itemDrops] invalid message filter grade");
+						filterGradeIndex = g.indexOf(g.itemGrades, g.settings.msgFilterGrade);
+
+						if filterGradeIndex == nil and alwaysShow ~= true then
+							if g.settings.msgFilterGrade ~= "off" then
+								CHAT_SYSTEM("[itemDrops] invalid message filter grade");
+							end
+						elseif filterGradeIndex <= itemGrade or alwaysShow == true then
+							groupNameMsg = " " .. groupName:lower();
+							if g.settings.showGroupName ~= true then
+								groupNameMsg = '';
+							end
+							
+							local itemGradeMsg = " " .. itemGradeMsg;
+							if g.settings.showGrade ~= true then
+								itemGradeMsg = '';
+							end
+							CHAT_SYSTEM(string.format("Dropped%s%s %s", itemGradeMsg, groupNameMsg, g.linkitem(itemObj)));
 						end
-					elseif filterGradeIndex <= itemGrade or alwaysShow == true then
-						groupNameMsg = " " .. groupName:lower();
-						if g.settings.showGroupName ~= true then
-							groupNameMsg = '';
-						end
-						
-						local itemGradeMsg = " " .. itemGradeMsg;
-						if g.settings.showGrade ~= true then
-							itemGradeMsg = '';
-						end
-						CHAT_SYSTEM(string.format("Dropped%s%s %s", itemGradeMsg, groupNameMsg, g.linkitem(itemObj)));
 					end
 				end 
 			end
 		end	
+	end
+end
+
+-- try to follow settings structure: setting = { owener = val; me = val; }
+function g.showOrNot(itemGrade, setting, alwaysShow, isMyItem)
+	local g = _G['ADDONS']['MIEI']['ITEMDROPS'];
+	local owner = "me";
+	if isMyItem == false then owner = "others" end
+
+	local filterGradeIndex = g.indexOf(g.itemGrades, setting[owner]);
+	if filterGradeIndex == nil and alwaysShow[owner] ~= true then
+		if g.settings.effectFilterGrade ~= "off" then
+			CHAT_SYSTEM("[itemDrops] invalid filter grade: " .. setting[owner]);
+		end
+		return false;
+	elseif filterGradeIndex <= itemGrade or alwaysShow[owner] == true then
+		return true;
 	end
 end
 
@@ -245,39 +266,49 @@ end
 
 function g.processCommand(words)
 	local g = _G["ADDONS"]["MIEI"]["ITEMDROPS"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
 	local cmd = table.remove(words,1);
 	local validFilterGrades = 'common, rare, epic, legendary, set, off';
 
 	if not cmd then
-		local msg = 'Item Drops{nl}';
+		local msg = '/drops others on/off{nl}';
+		msg = msg .. 'Enable/disable displaying drops owned by other people.{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops cards on/off{nl}';
-		msg = msg .. 'Enable/disable always showing xp card drops.{nl}';
+		msg = msg .. 'Always show xp card drops on/off{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops gems on/off{nl}';
-		msg = msg .. 'Enable/disable always showing gem drops.{nl}';
+		msg = msg .. 'Always show gem drops on/off.{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops silver on/off{nl}';
-		msg = msg .. 'Enable/disable showing name tag for silver.{nl}';
+		msg = msg .. 'Show name tags for silver on/off{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops msg [grade]{nl}';
 		msg = msg .. 'Set the filter grade for chat messages{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops fx [grade]{nl}';
-		msg = msg .. 'Set the filter grade for effects on dropped items{nl}';
+		msg = msg .. 'Set the filter grade for effects{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops name [grade]{nl}';
-		msg = msg .. 'Set the filter grade for item name tags{nl}';
+		msg = msg .. 'Set the filter grade for name tags{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. '/drops filter [grade]{nl}'
 		msg = msg .. 'Set ALL filters to the specified item grade.{nl}';
 		msg = msg .. '-----------{nl}';
 		msg = msg .. 'Filter [grade] can be any of the following:{nl}';
-		msg = msg .. validFilterGrades .. '{nl}';
-		msg = msg .. 'With off meaning that the feature will be disabled.'
-
+		msg = msg .. "| " .. validFilterGrades .. ' |{nl}';
+		msg = msg .. '"off" meaning that the feature will be disabled.'
+		
 		return ui.MsgBox(msg,"","Nope");
+
+	elseif cmd == 'others' then
+		cmd = table.remove(words,1);
+		if cmd == 'on' then
+			g.settings.onlyMyDrops = false;
+			CHAT_SYSTEM("[itemDrops] Showing drops owned by others.")
+		elseif cmd == 'off' then
+			g.settings.onlyMyDrops = true;
+			CHAT_SYSTEM("[itemDrops] Hiding drops owned by others.")
+		end
 
 	elseif cmd == 'cards' then
 		cmd = table.remove(words,1);
@@ -355,7 +386,7 @@ function g.processCommand(words)
 	else
 		CHAT_SYSTEM('[itemDrops] Invalid input. Type "/drops" for help.');
 	end
-	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
+	acutil.saveJSON(g.settingsFileLoc, g.settings);
 end
 
 
@@ -383,3 +414,8 @@ function g.indexOf( t, object )
 
 	return result;
 end
+
+-- INIT
+	g.addon:RegisterMsg("GAME_START_3SEC", "ITEMDROPS_3SEC");
+
+-- /INIT

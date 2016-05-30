@@ -1,9 +1,14 @@
+--todo:
+-- custom frame for settings
+-- optionally don't switch to whisper window upon recieving a whisper
+
 local addonName = "CLASSICCHAT";
 _G['ADDONS'] = _G['ADDONS'] or {};
 _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
-
+_G['ADDONS']['MIEI']['acutil'] = require('acutil');
 local g = _G['ADDONS']['MIEI'][addonName];
+
 g.myFamilyName = GETMYFAMILYNAME();
 
 if not g.loaded then
@@ -15,7 +20,7 @@ if not g.loaded then
 		urlClickWarning = true;
 		timeStamp = true;
 		urlMatching = true;	
-		version = 0.2;
+		--version = 0.2;
 	};
 
 	g.settings.whisperSound = {
@@ -98,7 +103,7 @@ g.settingsComment = [[%s
 ]];
 
 g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
-g.settingsFileLoc = "../addons/miei/classicchat-settings.lua";
+g.settingsFileLoc = "../addons/classicchat/settings.json";
 
 -- INIT
 	g.addon:RegisterMsg("GAME_START_3SEC", "CLASSICCHAT_3SEC");
@@ -107,10 +112,15 @@ g.settingsFileLoc = "../addons/miei/classicchat-settings.lua";
 
 function CLASSICCHAT_3SEC()
 	local g = _G["ADDONS"]["MIEI"]["CLASSICCHAT"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	local utils = require('acutil');
 
 	if g.loaded ~= true then
-		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		local temp, err = utils.loadJSON(g.settingsFileLoc, g.settings);
+		if err then 
+			utils.saveJSON(g.settingsFileLoc, g.settings);
+		else 
+			g.settings = temp; 
+		end
 
 		g.settings.itemColors = setmetatable(g.settings.itemColors, {__index = function() return tostring(g.settings.itemColors[1]) end });
 
@@ -137,7 +147,7 @@ end
 
 function CLASSICCHAT_ON_UICHAT(addonframe, eventMsg)
 	local g = _G["ADDONS"]["MIEI"]["CLASSICCHAT"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
+	local utils = require('acutil')
 	if g.settings.closeChatOnSend == true then
 		utils.closeChat();
 	end

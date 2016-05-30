@@ -4,6 +4,7 @@ _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
 local g = _G["ADDONS"]['MIEI'][addonName];
+local acutil = require('acutil');
 
 if not g.loaded then
 	g.settings = {
@@ -11,8 +12,6 @@ if not g.loaded then
 		onlyNotification = 0;
 		notifyDuration = 15;
 		chatMessage = 0;
-		version = 0.1;
-		
 	}
 end
 
@@ -25,14 +24,12 @@ onlyNotification 	- Do you want to only show text as a temporary notification af
 notifyDuration		- Duration of the notification text
 chatMessage			- Chat message for each new bgm?
 
-version				- do not touch this
-
 %s
 
 ]];
 
 g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
-g.settingsFileLoc = "../addons/miei/nowplaying-settings.lua";
+g.settingsFileLoc = "../addons/nowplaying/settings.json";
 
 -- INIT
 g.addon:RegisterMsg("GAME_START_3SEC", "NOWPLAYING_3SEC")
@@ -40,19 +37,19 @@ g.addon:RegisterMsg("GAME_START_3SEC", "NOWPLAYING_3SEC")
 
 function NOWPLAYING_3SEC()
 	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
-	local utils = _G['ADDONS']['MIEI']['utils'];
+	local acutil = require('acutil');
 
 	g.chatFrame = ui.GetFrame("chatframe");
 	g.frame = ui.GetFrame("nowplaying");
 	g.textBox = GET_CHILD(g.frame, "textbox");
 
 	if not g.loaded then
-		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
-		g.settings.notifyDuration = tonumber(g.settings.notifyDuration);
-		g.settings.showFrame = tonumber(g.settings.showFrame)
-		g.settings.onlyNotification = tonumber(g.settings.onlyNotification)
-		g.settings.chatMessage = tonumber(g.settings.chatMessage)
-
+		local t, err = acutil.loadJSON(g.settingsFileLoc, g.settings);
+		if err then
+			acutil.saveJSON(g.settingsFileLoc, g.settings);
+		else
+			g.settings = t;
+		end
 		g.addon:RegisterMsg('FPS_UPDATE', 'NOWPLAYING_UPDATE_FRAME');
 
 		g.frame:ShowWindow(g.settings.showFrame);
@@ -61,8 +58,8 @@ function NOWPLAYING_3SEC()
 			g.frame:SetDuration(g.settings.notifyDuration);
 		end
 
-		utils.slashcommands['/nowplaying'] = g.processCommand;
-		utils.slashcommands['/np'] = g.processCommand;
+		acutil.slashCommand('/nowplaying', g.processCommand);
+		acutil.slashCommand('/np', g.processCommand);
 		CHAT_SYSTEM('[nowPlaying:help] /np [on/off]');
 
 		g.loaded = true;
@@ -188,12 +185,5 @@ function g.processCommand(words)
 end
 
 function g.save()
-	local g = _G["ADDONS"]["MIEI"]["NOWPLAYING"];
-	local utils = _G["ADDONS"]["MIEI"]["utils"];
-	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
-	g.settings.notifyDuration = tonumber(g.settings.notifyDuration);
-	g.settings.showFrame = tonumber(g.settings.showFrame)
-	g.settings.onlyNotification = tonumber(g.settings.onlyNotification)
-	g.settings.chatMessage = tonumber(g.settings.chatMessage)
-
+	acutil.saveJSON(g.settingsFileLoc, g.settings);
 end

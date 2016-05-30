@@ -4,6 +4,7 @@ _G['ADDONS']['MIEI'] = _G['ADDONS']['MIEI'] or {}
 _G['ADDONS']['MIEI'][addonName] = _G['ADDONS']['MIEI'][addonName] or {};
 
 local g = _G["ADDONS"]["MIEI"][addonName];
+local acutil = require('acutil');
 if not g.loaded then
 	g.settings = {
 		duels = true;
@@ -24,21 +25,22 @@ notify 	--Do you want to receive a chat message each time a duel request is bloc
 ]];
 
 g.settingsComment = string.format(g.settingsComment, "--[[", "]]");
-g.settingsFileLoc = '../addons/miei/toggleduels-settings.lua';
+g.settingsFileLoc = '../addons/toggleduels/settings.json';
 
 --INIT
 g.addon:RegisterMsg("GAME_START_3SEC", "TOGGLEDUELS_3SEC");
 --/INIT
 
 function TOGGLEDUELS_3SEC()
-	local utils = _G['ADDONS']['MIEI']['utils'];
 	local g = _G["ADDONS"]["MIEI"]["TOGGLEDUELS"];
+	local acutil = require('acutil');
+
 	if g.loaded ~= true then
-		g.settings = utils.load(g.settings, g.settingsFileLoc, g.settingsComment);
+		g.settings = acutil.loadJSON(g.settingsFileLoc, g.settings);
 		
 		_G["ASKED_FRIENDLY_FIGHT"] = g.AskedFriendlyFight;
 
-		utils.slashcommands['/duels'] = g.processCommand;
+		acutil.slashCommand('/duels', g.processCommand);
 		CHAT_SYSTEM('[toggleDuels:help] /duels help{nl}' .. g.duelStatusString());
 
 		g.loaded = true;
@@ -46,7 +48,6 @@ function TOGGLEDUELS_3SEC()
 end
 
 function g.AskedFriendlyFight(handle, familyName)
-	local g = _G["ADDONS"]["MIEI"]["TOGGLEDUELS"];
 	if g.settings.duels == true then
 		local msgBoxString = ScpArgMsg("DoYouAcceptFriendlyFightingWith{Name}?", "Name", familyName);
 		ui.MsgBox(msgBoxString, string.format("ACK_FRIENDLY_FIGHT(%d)", handle) ,"None");
@@ -102,8 +103,7 @@ function g.processCommand(words)
 		msg = '[toggleDuels] Invalid input. Valid inputs are: on, off, notify, help.';
 	end
 	CHAT_SYSTEM(msg);
-	local utils = _G['ADDONS']['MIEI']['utils'];
-	utils.save(g.settings, g.settingsFileLoc, g.settingsComment);
+	acutil.saveJSON(g.settingsFileLoc, g.settings);
 end
 
 function g.duelStatusString()
