@@ -10,7 +10,6 @@ if g.loaded ~= true then
 		showMyPetName = 1;
 		showMyPetHP = 0;
 		showOtherPetNames = 0;
-		version = 0.1;
 	};
 end
 
