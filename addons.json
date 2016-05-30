@@ -1,0 +1,120 @@
+[
+	{
+        "name" : "Cabinet Commas",
+        "file" : "cabinetcommas",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Add thousands separators (commas) to the market sell and retrieve tabs for readability.",
+        "tags" : [
+            "market",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Classic Chat",
+        "file" : "classicchat",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Theme the chat window to be moer similar to a classic MMO chat. Includes features such as timestamps, custom colors per channel, HTTP links and more.",
+        "tags" : [
+            "chat",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Fix Font Size Slider",
+        "file" : "fixfontsizeslider",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Fix the font size slider to dynamically update the font size in the chat window.",
+        "tags" : [
+            "chat",
+            "ui",
+            "fix"
+        ]
+    },
+    {
+        "name" : "Now Playing",
+        "file" : "nowplaying",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Display the currently playing BGM above the chat window. Various options available, such as 'notify mode' when the track changes, etc. Slash commands available: /np help",
+        "tags" : [
+            "bgm",
+            "music"
+        ]
+    },
+    {
+        "name" : "Remove FPS Counter",
+        "file" : "removefpscounter",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Removes the FPS counter. The fps counter can be toggled with: /fps",
+        "tags" : [
+            "fps",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Remove Map Background",
+        "file" : "removemapbackground",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Removes the grey dimming background when the map is opened.",
+        "tags" : [
+            "map",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Remove Pet Info",
+        "file" : "removepetinfo",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Hides pet's HP bars and names. Settings configurable. Available slash commands: /comp, /companion",
+        "tags" : [
+            "ui",
+            "pet",
+            "companion"
+        ]
+    },
+    {
+        "name" : "Remove TP Button",
+        "file" : "removetpbutton",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Hides the TP button and replaces it with the slash command: /tp",
+        "tags" : [
+            "tp",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Toggle Duels",
+        "file" : "toggleduels",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Allows you to toggle whether or not you may recieve duel requests. Available slash commands: /duels help",
+        "tags" : [
+            "duels",
+        ]
+    },
+]
