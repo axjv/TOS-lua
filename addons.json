@@ -114,7 +114,7 @@
         "unicode" : "⚘",
         "description" : "Allows you to toggle whether or not you may recieve duel requests. Available slash commands: /duels help",
         "tags" : [
-            "duels",
+            "duels"
         ]
     },
 ]
