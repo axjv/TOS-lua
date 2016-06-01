@@ -19,7 +19,7 @@
         "fileVersion" : "v1.0.0",
         "releaseTag" : "ac-test",
         "unicode" : "⚘",
-        "description" : "Theme the chat window to be moer similar to a classic MMO chat. Includes features such as timestamps, custom colors per channel, HTTP links and more.",
+        "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as timestamps, custom colors per channel, HTTP links and more.",
         "tags" : [
             "chat",
             "ui"
