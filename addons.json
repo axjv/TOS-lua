@@ -79,20 +79,6 @@
         ]
     },
     {
-        "name" : "Remove Pet Info",
-        "file" : "removepetinfo",
-        "extension" : "ipf",
-        "fileVersion" : "v1.0.0",
-        "releaseTag" : "ac-test",
-        "unicode" : "⚘",
-        "description" : "Hides pet's HP bars and names. Settings configurable. Available slash commands: /comp, /companion",
-        "tags" : [
-            "ui",
-            "pet",
-            "companion"
-        ]
-    },
-    {
         "name" : "Remove TP Button",
         "file" : "removetpbutton",
         "extension" : "ipf",
