@@ -1,12 +1,4 @@
-### If you have used development versions (any version that wasn't from [releases](https://github.com/Miei/TOS-lua/releases)) of my addons, please remove all of those files and do a fresh install of the release version to avoid conflicts.
-
-### This section is for development versions only. Please use the [release](https://github.com/Miei/TOS-lua/releases) section for downloads.
-
-#### Installation instructions & notes:
-
-A lot of these addons require Miei Utility. Please make sure that you install this as well as the addon(s) that you would like.
-
-When installing a .ipf file to /data/, make sure it has a unicode character at the start of the name. For example: ⚘miei_utility.ipf
+### This section is for development versions only. Please use [addon manager](https://github.com/Excrulon/Tree-of-Savior-Addon-Manager) to install.
 
 
 [![Addon Safe](https://cdn.rawgit.com/lubien/awesome-tos/master/badges/addon-safe.svg)](https://github.com/lubien/awesome-tos#addons-badges)  [![Addon Status Unknown](https://cdn.rawgit.com/lubien/awesome-tos/master/badges/addon-unknown.svg)](https://github.com/lubien/awesome-tos#addons-badges) 
