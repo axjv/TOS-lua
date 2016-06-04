@@ -3,7 +3,7 @@
         "name" : "Cabinet Commas",
         "file" : "cabinetcommas",
         "extension" : "ipf",
-        "fileVersion" : "v1.0.0",
+        "fileVersion" : "v1.1.0",
         "releaseTag" : "ac-test",
         "unicode" : "⚘",
         "description" : "Add thousands separators (commas) to the market sell and retrieve tabs for readability.",
