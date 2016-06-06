@@ -40,6 +40,20 @@
         ]
     },
     {
+        "name" : "Item Drops",
+        "file" : "itemdrops",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "id-v1.0.0",
+        "unicode" : "⚘",
+        "description" : "Show effects on items that are on the ground, similar to Diablo III style, for you and your party members' loot. Chat messages and other features available, see slash command: /drops",
+        "tags" : [
+            "items",
+            "drops",
+            "loot"
+        ]
+    },
+    {
         "name" : "Now Playing",
         "file" : "nowplaying",
         "extension" : "ipf",
