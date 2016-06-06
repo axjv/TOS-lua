@@ -26,6 +26,21 @@
         ]
     },
     {
+        "name" : "Context Menu Additions",
+        "file" : "contextmenuadditions",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "cma-v1.0.0",
+        "unicode" : "⚘",
+        "description" : "Add more options to the context menus (right click) on actors and on chat messages, such as character info, report and block, clear sender messages, etc.",
+        "tags" : [
+            "chat",
+            "ui",
+            "context",
+            "menu"
+        ]
+    },
+    {
         "name" : "Fix Font Size Slider",
         "file" : "fixfontsizeslider",
         "extension" : "ipf",
