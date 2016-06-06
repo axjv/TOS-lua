@@ -16,7 +16,7 @@
         "name" : "Classic Chat",
         "file" : "classicchat",
         "extension" : "ipf",
-        "fileVersion" : "v1.1.1",
+        "fileVersion" : "v1.1.2",
         "releaseTag" : "ac-test",
         "unicode" : "⚘",
         "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as timestamps, custom colors per channel, HTTP links and more. This addon is not compatible with LKChat.",
