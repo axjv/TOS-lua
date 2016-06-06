@@ -46,7 +46,7 @@
         "fileVersion" : "v1.0.0",
         "releaseTag" : "id-v1.0.0",
         "unicode" : "⚘",
-        "description" : "Show effects on items that are on the ground, similar to Diablo III style, for you and your party members' loot. Chat messages and other features available, see slash command: /drops",
+        "description" : "Show effects on items that are on the ground, similar to Diablo III style, for you and your party members' loot. Also allows items to show their name tag, as if you were holding ALT constantly, immediately as they are dropped. Chat messages and other features available, see slash command: /drops",
         "tags" : [
             "items",
             "drops",
