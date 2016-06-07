@@ -138,8 +138,8 @@
         "name" : "Toggle Duels",
         "file" : "toggleduels",
         "extension" : "ipf",
-        "fileVersion" : "v1.0.0",
-        "releaseTag" : "ac-test",
+        "fileVersion" : "v1.1.0",
+        "releaseTag" : "td-v1.1.0",
         "unicode" : "⚘",
         "description" : "Allows you to toggle whether or not you may recieve duel requests. Available slash commands: /duels help",
         "tags" : [
