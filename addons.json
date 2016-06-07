@@ -121,6 +121,20 @@
         ]
     },
     {
+        "name" : "Remove Whisper Switch",
+        "file" : "removewhisperswitch",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "rws-v1.0.0",
+        "unicode" : "⚘",
+        "description" : "Stops the chat window from automatically switching to whisper rooms upon receiving a whisper.",
+        "tags" : [
+            "chat",
+            "ui",
+            "whisper"
+        ]
+    },
+    {
         "name" : "Toggle Duels",
         "file" : "toggleduels",
         "extension" : "ipf",
