@@ -16,10 +16,10 @@
         "name" : "Classic Chat",
         "file" : "classicchat",
         "extension" : "ipf",
-        "fileVersion" : "v1.1.2",
-        "releaseTag" : "ac-test",
+        "fileVersion" : "v2.0.0",
+        "releaseTag" : "cc-v2.0.0",
         "unicode" : "⚘",
-        "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as timestamps, custom colors per channel, HTTP links and more. This addon is not compatible with LKChat.",
+        "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as gold spammer detection and auto blocking/reporting, timestamps, custom colors per channel, HTTP links and more. This addon has begun merging functionality with LKChat, please uninstall LKChat if you would like to use this. Slash commands: /chat, /classicchat, /lkc",
         "tags" : [
             "chat",
             "ui"
@@ -111,8 +111,8 @@
         "name" : "Remove TP Button",
         "file" : "removetpbutton",
         "extension" : "ipf",
-        "fileVersion" : "v1.0.0",
-        "releaseTag" : "ac-test",
+        "fileVersion" : "v1.1.0",
+        "releaseTag" : "cc-v2.0.0",
         "unicode" : "⚘",
         "description" : "Hides the TP button and replaces it with the slash command: /tp",
         "tags" : [
