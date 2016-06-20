@@ -1,0 +1,149 @@
+[
+	{
+        "name" : "Cabinet Commas",
+        "file" : "cabinetcommas",
+        "extension" : "ipf",
+        "fileVersion" : "v1.1.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Add thousands separators (commas) to the market sell and retrieve tabs for readability.",
+        "tags" : [
+            "market",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Classic Chat",
+        "file" : "classicchat",
+        "extension" : "ipf",
+        "fileVersion" : "v2.0.3",
+        "releaseTag" : "cc-v2.0.0",
+        "unicode" : "⚘",
+        "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as gold spammer detection and auto blocking/reporting, timestamps, custom colors per channel, HTTP links and more. This addon has begun merging functionality with LKChat, please uninstall LKChat if you would like to use this. Slash commands: /chat, /classicchat, /lkc",
+        "tags" : [
+            "chat",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Context Menu Additions",
+        "file" : "contextmenuadditions",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "cma-v1.0.0",
+        "unicode" : "⚘",
+        "description" : "Add more options to the context menus (right click) on actors and on chat messages, such as character info, report and block, clear sender messages, etc.",
+        "tags" : [
+            "chat",
+            "ui",
+            "context",
+            "menu"
+        ]
+    },
+    {
+        "name" : "Fix Font Size Slider",
+        "file" : "fixfontsizeslider",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Fix the font size slider to dynamically update the font size in the chat window.",
+        "tags" : [
+            "chat",
+            "ui",
+            "fix"
+        ]
+    },
+    {
+        "name" : "Item Drops",
+        "file" : "itemdrops",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "id-v1.0.0",
+        "unicode" : "⚘",
+        "description" : "Show effects on items that are on the ground, similar to Diablo III style, for you and your party members' loot. Also allows items to show their name tag, as if you were holding ALT constantly, immediately as they are dropped. Chat messages and other features available, see slash command: /drops",
+        "tags" : [
+            "items",
+            "drops",
+            "loot"
+        ]
+    },
+    {
+        "name" : "Now Playing",
+        "file" : "nowplaying",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Display the currently playing BGM above the chat window. Various options available, such as 'notify mode' when the track changes, etc. Slash commands available: /np help",
+        "tags" : [
+            "bgm",
+            "music"
+        ]
+    },
+    {
+        "name" : "Remove FPS Counter",
+        "file" : "removefpscounter",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Removes the FPS counter. The fps counter can be toggled with: /fps",
+        "tags" : [
+            "fps",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Remove Map Background",
+        "file" : "removemapbackground",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "ac-test",
+        "unicode" : "⚘",
+        "description" : "Removes the grey dimming background when the map is opened.",
+        "tags" : [
+            "map",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Remove TP Button",
+        "file" : "removetpbutton",
+        "extension" : "ipf",
+        "fileVersion" : "v1.1.0",
+        "releaseTag" : "cc-v2.0.0",
+        "unicode" : "⚘",
+        "description" : "Hides the TP button and replaces it with the slash command: /tp",
+        "tags" : [
+            "tp",
+            "ui"
+        ]
+    },
+    {
+        "name" : "Remove Whisper Switch",
+        "file" : "removewhisperswitch",
+        "extension" : "ipf",
+        "fileVersion" : "v1.0.0",
+        "releaseTag" : "rws-v1.0.0",
+        "unicode" : "⚘",
+        "description" : "Stops the chat window from automatically switching to whisper rooms upon receiving a whisper.",
+        "tags" : [
+            "chat",
+            "ui",
+            "whisper"
+        ]
+    },
+    {
+        "name" : "Toggle Duels",
+        "file" : "toggleduels",
+        "extension" : "ipf",
+        "fileVersion" : "v1.1.0",
+        "releaseTag" : "td-v1.1.0",
+        "unicode" : "⚘",
+        "description" : "Allows you to toggle whether or not you may recieve duel requests. Available slash commands: /duels help",
+        "tags" : [
+            "duels"
+        ]
+    }
+]
