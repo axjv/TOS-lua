@@ -16,7 +16,7 @@
         "name" : "Classic Chat",
         "file" : "classicchat",
         "extension" : "ipf",
-        "fileVersion" : "v2.0.3",
+        "fileVersion" : "v2.0.6",
         "releaseTag" : "cc-v2.0.0",
         "unicode" : "⚘",
         "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as gold spammer detection and auto blocking/reporting, timestamps, custom colors per channel, HTTP links and more. This addon has begun merging functionality with LKChat, please uninstall LKChat if you would like to use this. Slash commands: /chat, /classicchat, /lkc",
