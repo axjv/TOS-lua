@@ -26,8 +26,10 @@ function CLASSICCHAT_3SEC()
 		g.messages = {};
 		g.messages.ignore = {};
 		g.messages.names = {};
-		
+		g.sizes = {};
+
 		g.settingsFileLoc = path.GetDataPath() .. "..\\addons\\classicchat\\settings.json";
+
 		g.botSpamTest = "([3vw]-%s*[vw]-%s*[vw]-%s*[vw]-%s*[,%.%-]+%s*.-%s*[,%.%-]+%s*c[_%s]-[o0%(%)]-[_%s]-[nm])(.*)";
 		g.botSpamPatterns = {
 			-- find
@@ -40,19 +42,23 @@ function CLASSICCHAT_3SEC()
 			{ pattern = "f@st",				type = "find", weight = 1 },
 			{ pattern = "offer",			type = "find", weight = 1 },
 			{ pattern = "qq",				type = "find", weight = 1 },
+			{ pattern = "skype",			type = "find", weight = 1 },
 			{ pattern = "delivery",			type = "find", weight = 1 },
 			{ pattern = "silver",			type = "find", weight = 1 },
 			{ pattern = "s1lver",			type = "find", weight = 1 },
 			{ pattern = "gold",				type = "find", weight = 1 },
 			{ pattern = "g0ld",				type = "find", weight = 1 },
 			{ pattern = "powerleveling",	type = "find", weight = 1 },
+			{ pattern = "powerlevling",		type = "find", weight = 1 },
 			{ pattern = "p0wer1eve1ing",	type = "find", weight = 1 },
-			{ pattern = "mmoceo",			type = "find", weight = 1 },
-			{ pattern = "m%-m%-o%-c%-e%-o",		type = "find", weight = 3 },
+			{ pattern = "mmoceo",			type = "find", weight = 2 },
+			{ pattern = "mmocvv",			type = "find", weight = 2 },
+			{ pattern = "hoagold",			type = "find", weight = 2 },
+			{ pattern = "m%-m%-o%-c%-e%-o",	type = "find", weight = 3 },
 
 			-- match
-			{ pattern = "%d+k=%d+%$",		type = "match", weight = 3 },	-- 100k=1$
-			{ pattern = "%d+k=%d[,%.]%d+%$",		type = "match", weight = 3 },	-- 100k=0.6$
+			{ pattern = "=%d+%$",		type = "match", weight = 3 },	-- =1$
+			{ pattern = "=%d[,%.]%d+%$",type = "match", weight = 3 },	-- =0.6$
 		};
 
 
@@ -196,7 +202,7 @@ end
 
 function CLASSICCHAT.redraw()
 	DRAW_CHAT_MSG("chatgbox_TOTAL", CLASSICCHAT.sizeParam, 0);
-
+	CLASSICCHAT.realign()
 end
 
 function CLASSICCHAT_REALIGN()
@@ -211,8 +217,7 @@ function CLASSICCHAT_REALIGN()
 		if string.sub(childName, 1, 5) == "chatg" then
 			if groupBox:GetClassName() == "groupbox" then
 				groupBox = tolua.cast(groupBox, "ui::CGroupBox");
-				local beforeHeight = 1;
-				local lastChild = nil;
+				local y = 0;
 				local ctrlSetCount = groupBox:GetChildCount();
 				for j = 0 , ctrlSetCount - 1 do
 					local chatCtrl = groupBox:GetChildByIndex(j);
@@ -221,19 +226,11 @@ function CLASSICCHAT_REALIGN()
 						local txt = GET_CHILD(label, "text");
 						local timeBox = GET_CHILD(chatCtrl, "timebox");
 						RESIZE_CHAT_CTRL(chatCtrl, label, txt, timeBox)
-						beforeHeight = chatCtrl:GetY() + chatCtrl:GetHeight();
-						lastChild = chatCtrl;
+						chatCtrl:SetOffset(ctrl:GetX(), y);
+						y = y + chatCtrl:GetHeight();
 					end
 				end
 
-				GBOX_AUTO_ALIGN(groupBox, 0, 0, 0, true, false);
-				if lastChild ~= nil then
-					local afterHeight = lastChild:GetY() + lastChild:GetHeight();					
-					local heightRatio = afterHeight / beforeHeight;
-					
-					groupBox:UpdateData();
-					groupBox:SetScrollPos(groupBox:GetCurLine() * (heightRatio * 1.1));
-				end
 			end
 		end
 	end
@@ -333,7 +330,6 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 
 	for i = startIndex , size - 1 do
 		if i ~= 0 then
-
 			local j = tonumber(i);
 			local clusterInfo = nil;
 			repeat
@@ -348,10 +344,12 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 			if clusterInfo ~= nil then
 				local beforeChildName = "cluster_"..clusterInfo:GetClusterID()
 				local beforeChild = GET_CHILD(groupBox, beforeChildName);
+
 				if beforeChild ~= nil then
 					ypos = beforeChild:GetY() + beforeChild:GetHeight();
 				end
 			end
+
 			if ypos == 0 then
 				DRAW_CHAT_MSG(groupBoxName, size, 0, frameName);
 				return;
@@ -500,17 +498,16 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 
 			
 			repeat
-			if g.settings.whisperNotice and messageType == "Whisper" and startIndex ~= 0 then
-				if g.settings.whisperSound.onSendingMessage ~= true and messageSender == g.myFamilyName then break end
-				if g.isWhisperCooldown == true then break end
-				if g.settings.whisperSound.requireNewCluster == true and cluster ~= nil then break end
+				if g.settings.whisperNotice and messageType == "Whisper" and startIndex ~= 0 then
+					if g.settings.whisperSound.onSendingMessage ~= true and messageSender == g.myFamilyName then break end
+					if g.isWhisperCooldown == true then break end
+					if g.settings.whisperSound.requireNewCluster == true and cluster ~= nil then break end
 
-				imcSound.PlaySoundEvent(g.settings.whisperSound.sound);
-				g.isWhisperCooldown = true;
-				ReserveScript("CLASSICCHAT.isWhisperCooldown = false;", g.settings.whisperSound.cooldown);
-			end
+					imcSound.PlaySoundEvent(g.settings.whisperSound.sound);
+					g.isWhisperCooldown = true;
+					ReserveScript("CLASSICCHAT.isWhisperCooldown = false;", g.settings.whisperSound.cooldown);
+				end
 			until true
-
 
 			local myColor, targetColor = GET_CHAT_COLOR(clusterInfo:GetMsgType())
 
@@ -519,7 +516,6 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 			local horzGravity = ui.LEFT;
 
 			if true == ui.IsMyChatCluster(clusterInfo) and g.settings.theme == 'bubble' then
-				
 				chatCtrlName = 'chati';
 				horzGravity = ui.RIGHT;
 			end
@@ -541,21 +537,15 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 			local timeCtrl = GET_CHILD(timeBox, "time", "ui::CRichText");
 			local nameText = GET_CHILD(chatCtrl, "name", "ui::CRichText");
 
-			chatCtrl:EnableHitTest(1);
 			notread:ShowWindow(0);
 
-			txt:SetTextByKey("size", fontSize);
-			txt:SetTextByKey("text", messageText);
-
-			timeCtrl:SetTextByKey("time", clusterInfo:GetTimeStr());
-			
 			if g.settings.theme == 'simple' then
+				txt:SetMaxWidth(groupBox:GetWidth()-40);
+				txt:Resize(groupBox:GetWidth()-40, txt:GetHeight());
 				txt:SetGravity(ui.LEFT, ui.TOP);
+
 				label:SetOffset(25, 0);
 				label:SetAlpha(0);
-				
-				--txt:Resize(groupBox:GetWidth()-40, txt:GetHeight());
-				--txt:Resize(groupBox:GetWidth(), txt:GetHeight());
 
 				timeBox:ShowWindow(0);
 				nameText:ShowWindow(0);
@@ -563,6 +553,13 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 				timeBox:ShowWindow(g.settings.timeStamp and 1 or 0);
 				txt:SetGravity(ui.CENTER_HORZ, ui.CENTER_VERT)
 			end
+			
+			txt:SetTextByKey("size", fontSize);
+			txt:SetTextByKey("text", messageText);
+
+			timeCtrl:SetTextByKey("time", clusterInfo:GetTimeStr());
+			
+
 
 			if chatCtrlName == 'chati' then
 				label:SetSkinName('textballoon_i');
@@ -578,19 +575,27 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 			
 			
 			if messageType ~= "System" then
+				--txt:SetUserValue("TARGET_NAME", clusterInfo:GetCommanderName()); -- crashy crashy ;_;
 				chatCtrl:SetEventScript(ui.RBUTTONUP, 'CHAT_RBTN_POPUP');
 				chatCtrl:SetUserValue("TARGET_NAME", clusterInfo:GetCommanderName());
 				chatCtrl:EnableHitTest(1);
 			end
-			
+
+			chatCtrl:SetEventScript(ui.LBUTTONDOWN, 'CLASSICCHAT_LBUTTONDOWN')
+
+--[[
 			local slflag = messageText:find('a SL')
 			if slflag == nil then
 				label:EnableHitTest(0)
 			else
 				label:EnableHitTest(1)
 			end
+]]
+			label:EnableHitTest(0)
 
 			RESIZE_CHAT_CTRL(chatCtrl, label, txt, timeBox);
+			if g.sizes[groupBoxName] == nil then g.sizes[groupBoxName] = 0; end
+			g.sizes[groupBoxName] = g.sizes[groupBoxName] + 1;
 		end
 	end
 
@@ -627,7 +632,18 @@ function CLASSICCHAT.drawChatMsg(groupBoxName, size, startIndex, frameName)
 			chat.UpdateReadFlag(roomID);
 		end
 	end
-	CLASSICCHAT.realign()
+
+end
+
+
+CLASSICCHAT.labels = {};
+function CLASSICCHAT_LBUTTONDOWN(frame, chatCtrl, argStr, argNum)
+	local label = chatCtrl:GetChild('bg');
+	local id = math.floor(math.random(999999));
+
+	CLASSICCHAT.labels[id] = label;
+	label:EnableHitTest(1)
+	ReserveScript('CLASSICCHAT.labels['..id..']:EnableHitTest(0); CLASSICCHAT.labels['..id..'] = nil;', 1);
 end
 
 function SLL(text, warned)
@@ -789,9 +805,10 @@ end
 
 function CLASSICCHAT.resizeChatCtrl(chatCtrl, label, txt, timeBox)
 	local g = _G['CLASSICCHAT']
-	if g.settings.theme == 'simple' then
+	local groupBox = chatCtrl:GetParent();
 
-				--[[
+	if g.settings.theme == 'simple' then
+		--[[
 		local offsetX = 40;
 		local chatFrame = chatCtrl:GetParent():GetParent();
 		local lablWidth = txt:GetWidth() + 40;
@@ -799,18 +816,27 @@ function CLASSICCHAT.resizeChatCtrl(chatCtrl, label, txt, timeBox)
 		label:Resize(chatWidth - offsetX, txt:GetHeight());
 		chatCtrl:Resize(chatWidth, label:GetHeight());
 		txt:SetTextMaxWidth(chatWidth - offsetX);
-]]
-		local groupBox = chatCtrl:GetParent();
+
+		local width = groupBox:GetWidth()-40;
+		local chatWidth = groupBox:GetWidth();
+
+		label:Resize(width, label:GetHeight());
+		txt:SetMaxWidth(width);
+
+		local height = txt:GetHeight();
+
+		txt:Resize(width, height);
+		label:Resize(width, height);
+		chatCtrl:Resize(chatWidth, height);
+				]]
+
+
 		local labelWidth = txt:GetWidth();
 		local chatWidth = groupBox:GetWidth();
 
-		txt:SetMaxWidth(groupBox:GetWidth()-40);
-		txt:Resize(groupBox:GetWidth()-40, txt:GetHeight());
-
 		label:Resize(labelWidth, txt:GetHeight());
-		chatCtrl:Resize(chatWidth, --[[label:GetY() + ]]label:GetHeight());
-		
-	else
+		chatCtrl:Resize(chatWidth, label:GetY() + label:GetHeight());
+	elseif g.settings.theme == 'bubble' then
 		local lablWidth = txt:GetWidth() + 40;
 		local chatWidth = chatCtrl:GetWidth();
 		label:Resize(lablWidth, txt:GetHeight() + 20);
@@ -892,41 +918,40 @@ function CLASSICCHAT_ON_CHANGE_THEME(frame, ctrl, str, num)
 	
 	local themeIndex = dropList:GetSelItemIndex();
 	g.settings.theme = themeIndex == 0 and 'simple' or 'bubble';
-	--CLASSICCHAT.realign()
 	g.redraw();
 	g.save();
 end
 
 function CLASSICCHAT_ON_SLIDE_FONTSIZE(frame, ctrl, str, num)
-	local w_SLIDE = tolua.cast(ctrl, "ui::CSlideBar");
-	local size = w_SLIDE:GetLevel();
+	local slider = tolua.cast(ctrl, "ui::CSlideBar");
+	local size = slider:GetLevel();
 
 	config.SetConfig("CHAT_FONTSIZE", size);
 	CHAT_SET_FONTSIZE(size);
 
-	local w_PARENT = ctrl:GetParent();
-	local w_LABEL = GET_CHILD(w_PARENT, "label_FontSize", "ui::CRichText");
-	w_LABEL:SetTextByKey("size", GET_CHAT_FONT_SIZE());
+	local parent = ctrl:GetParent();
+	local label = GET_CHILD(parent, "label_FontSize", "ui::CRichText");
+	label:SetTextByKey("size", GET_CHAT_FONT_SIZE());
 end
 
 function CLASSICCHAT_ON_SLIDE_OPACITY(frame, ctrl, str, num)
-	local w_SLIDE = tolua.cast(ctrl, "ui::CSlideBar");
-	local value = w_SLIDE:GetLevel();
+	local slider = tolua.cast(ctrl, "ui::CSlideBar");
+	local value = slider:GetLevel();
 	
-	local w_PARENT = ctrl:GetParent();
-	local w_LABEL = GET_CHILD(w_PARENT, "label_Transparency", "ui::CRichText");
-	w_LABEL:SetTextByKey("pct", string.format("%0.f%%", (value / 255) * 100));
+	local parent = ctrl:GetParent();
+	local label = GET_CHILD(parent, "label_Transparency", "ui::CRichText");
+	label:SetTextByKey("pct", string.format("%0.f%%", (value / 255) * 100));
 	
-	config.SetConfig("CLCLCHAT_OPACITY", value or 160);
+	config.SetConfig("CLCHAT_OPACITY", value or 160);
 	CHAT_SET_OPACITY(value or 160);
 
 end
 
 function CLASSICCHAT_ON_CHECKBOX(frame, obj, argStr, argNum)
 	local g = _G['CLASSICCHAT'];
-	local w_CHECKBOX = tolua.cast(obj, "ui::CCheckBox");
+	local checkBox = tolua.cast(obj, "ui::CCheckBox");
 	
-	local isChecked = w_CHECKBOX:IsChecked();
+	local isChecked = checkBox:IsChecked();
 	local setting = obj:GetName():gsub('check_', '');
 	g.settings[setting] = isChecked == 1 or false;
 	g.save();
@@ -939,73 +964,69 @@ function CLASSICCHAT.InitializeSettings()
 	local g = _G['CLASSICCHAT']
 	local frame = ui.GetFrame('classicchat')
 
-	local w_GROUP_SETTINGS = GET_CHILD(frame, "gbox_settings", "ui::CGroupBox");
-	local w_GROUP_CHATDISPLAY = GET_CHILD(w_GROUP_SETTINGS, "gbox_ChatDisplay", "ui::CGroupBox");
-	local w_GROUP_ANTISPAM = GET_CHILD(w_GROUP_SETTINGS, "gbox_AntiSpam", "ui::CGroupBox");
+	local gBoxSettings = GET_CHILD(frame, "gbox_settings", "ui::CGroupBox");
+	local gBoxChatDisplay = GET_CHILD(gBoxSettings, "gbox_ChatDisplay", "ui::CGroupBox");
+	local gBoxAntiSpam = GET_CHILD(gBoxSettings, "gbox_AntiSpam", "ui::CGroupBox");
 	
 	-- Theme Dropdown List
-	local w_DROPLISTTHEME = GET_CHILD(w_GROUP_CHATDISPLAY, "droplist_Theme", "ui::CDropList");
-	w_DROPLISTTHEME:ClearItems();
-	w_DROPLISTTHEME:AddItem(0, "Simple");
-	w_DROPLISTTHEME:AddItem(1, "Bubble");
+	local dropListTheme = GET_CHILD(gBoxChatDisplay, "droplist_Theme", "ui::CDropList");
+	dropListTheme:ClearItems();
+	dropListTheme:AddItem(0, "Simple");
+	dropListTheme:AddItem(1, "Bubble");
 
 	-- Load stored theme
-	w_DROPLISTTHEME:SelectItem(g.settings.theme == 'bubble' and 1 or 0);
+	dropListTheme:SelectItem(g.settings.theme == 'bubble' and 1 or 0);
 	
 	-- Font Size
-	local w_SLIDERFONTSIZE = GET_CHILD(w_GROUP_CHATDISPLAY, "slider_FontSize", "ui::CSlideBar");
-	w_SLIDERFONTSIZE:SetLevel(config.GetConfigInt("CHAT_FONTSIZE", 100));
-	local w_LABELFONTSIZE = GET_CHILD(w_GROUP_CHATDISPLAY, "label_FontSize", "ui::CRichText");
-	w_LABELFONTSIZE:SetTextByKey("size", GET_CHAT_FONT_SIZE());
+	local sliderFontSize = GET_CHILD(gBoxChatDisplay, "slider_FontSize", "ui::CSlideBar");
+	sliderFontSize:SetLevel(config.GetConfigInt("CHAT_FONTSIZE", 100));
+
+	local labelFontSize = GET_CHILD(gBoxChatDisplay, "label_FontSize", "ui::CRichText");
+	labelFontSize:SetTextByKey("size", GET_CHAT_FONT_SIZE());
 
 	-- Transparency
-	local w_SLIDER_TRANSPARENCY = GET_CHILD(w_GROUP_CHATDISPLAY, "slider_Transparency", "ui::CSlideBar");
-	w_SLIDER_TRANSPARENCY:SetLevel(config.GetConfigInt("CLCHAT_OPACITY", 160));
-	local w_LABEL_TRANSPARENCY = GET_CHILD(w_GROUP_CHATDISPLAY, "label_Transparency", "ui::CRichText");
-	w_LABEL_TRANSPARENCY:SetTextByKey("pct", string.format("%0.f%%", (config.GetConfigInt("CLCHAT_OPACITY", 160) / 255) * 100));
+	local sliderTransparency = GET_CHILD(gBoxChatDisplay, "slider_Transparency", "ui::CSlideBar");
+	sliderTransparency:SetLevel(config.GetConfigInt("CLCHAT_OPACITY", 160));
+
+	local labelTransparency = GET_CHILD(gBoxChatDisplay, "label_Transparency", "ui::CRichText");
+	labelTransparency:SetTextByKey("pct", string.format("%0.f%%", (config.GetConfigInt("CLCHAT_OPACITY", 160) / 255) * 100));
+
 	CHAT_SET_OPACITY(config.GetConfigInt("CLCHAT_OPACITY", 160));
 
+
 	-- Timestamp
-	local w_CHECKBOXTIMESTAMP = GET_CHILD(w_GROUP_CHATDISPLAY, "check_timeStamp", "ui::CCheckBox");
-	w_CHECKBOXTIMESTAMP:SetCheck(g.settings.timeStamp and 1 or 0);
+	local checkTimeStamp = GET_CHILD(gBoxChatDisplay, "check_timeStamp", "ui::CCheckBox");
+	checkTimeStamp:SetCheck(g.settings.timeStamp and 1 or 0);
 	
 	-- Autohide Input
-	local w_AUTOHIDEINPUT = GET_CHILD(w_GROUP_CHATDISPLAY, "check_closeChatOnSend", "ui::CCheckBox");
-	w_AUTOHIDEINPUT:SetCheck(g.settings.closeChatOnSend and 1 or 0);
+	local checkCloseOnSend = GET_CHILD(gBoxChatDisplay, "check_closeChatOnSend", "ui::CCheckBox");
+	checkCloseOnSend:SetCheck(g.settings.closeChatOnSend and 1 or 0);
 
 	-- Whisper Notice
-	local w_WHISPERNOTICE = GET_CHILD(w_GROUP_CHATDISPLAY, "check_whisperNotice", "ui::CCheckBox");
-	w_WHISPERNOTICE:SetCheck(g.settings.whisperNotice and 1 or 0);
+	local checkWhisperNotice = GET_CHILD(gBoxChatDisplay, "check_whisperNotice", "ui::CCheckBox");
+	checkWhisperNotice:SetCheck(g.settings.whisperNotice and 1 or 0);
 	
 	-- Friend Notice
-	local w_FRIENDNOTICE = GET_CHILD(w_GROUP_CHATDISPLAY, "check_friendNotice", "ui::CCheckBox");
-	w_FRIENDNOTICE:SetCheck(g.settings.friendNotice and 1 or 0);
+	local checkFriendNotice = GET_CHILD(gBoxChatDisplay, "check_friendNotice", "ui::CCheckBox");
+	checkFriendNotice:SetCheck(g.settings.friendNotice and 1 or 0);
 	
 	-- AntiSpam
 
 	-- Spam Detection
-	local w_CHECK_SPAMDETECT = GET_CHILD(w_GROUP_ANTISPAM, "check_spamDetection", "ui::CCheckBox");
-	w_CHECK_SPAMDETECT:SetCheck(g.settings.spamDetection and 1 or 0);
+	local checkSpamDetect = GET_CHILD(gBoxAntiSpam, "check_spamDetection", "ui::CCheckBox");
+	checkSpamDetect:SetCheck(g.settings.spamDetection and 1 or 0);
 
 	-- Spam Notice
-	local w_CHECK_SPAMNOTICE = GET_CHILD(w_GROUP_ANTISPAM, "check_spamNotice", "ui::CCheckBox");
-	w_CHECK_SPAMNOTICE:SetCheck(g.settings.spamNotice and 1 or 0);
+	local checkSpamNotice = GET_CHILD(gBoxAntiSpam, "check_spamNotice", "ui::CCheckBox");
+	checkSpamNotice:SetCheck(g.settings.spamNotice and 1 or 0);
 	
 	-- Auto Report
-	local w_CHECK_AUTOREPORT = GET_CHILD(w_GROUP_ANTISPAM, "check_reportSpamBots", "ui::CCheckBox");
-	w_CHECK_AUTOREPORT:SetCheck(g.settings.reportSpamBots and 1 or 0);
+	local checkAutoReport = GET_CHILD(gBoxAntiSpam, "check_reportSpamBots", "ui::CCheckBox");
+	checkAutoReport:SetCheck(g.settings.reportSpamBots and 1 or 0);
 
 	-- Display Reason
-	local w_CHECK_DISPLAYREASON = GET_CHILD(w_GROUP_ANTISPAM, "check_blockReason", "ui::CCheckBox");
-	w_CHECK_DISPLAYREASON:SetCheck(g.settings.blockReason and 1 or 0);		
-	
-				--[[
-	-- Misc
-	
-	-- Display FPS
-	local w_CHECK_DISPLAYFPS = GET_CHILD(w_GROUP_SETTINGS, "check_DisplayFPS", "ui::CCheckBox");
-	w_CHECK_DISPLAYFPS:SetCheck(LKChat.GetConfigByKey("LKCHAT_DISPLAYFPS"));
-	PRIVATE.DisplayFPS();]]
+	local checkBlockReason = GET_CHILD(gBoxAntiSpam, "check_blockReason", "ui::CCheckBox");
+	checkBlockReason:SetCheck(g.settings.blockReason and 1 or 0);		
 
 end
 
@@ -1035,24 +1056,28 @@ function CLASSICCHAT.GetMessageType(msg)
 	return messageType;
 end
 
+function CLASSICCHAT.hasUrl(text)
+	local g = _G['CLASSICCHAT'];
+	if g.processUrls(text) ~= text or string.match(string.lower(text), g.botSpamTest) then
+		return true;
+	end
+	return false;
+end
+
 -- Text is set to lowercase for easier detection
 function CLASSICCHAT.filterMessage(text)
 	local g = _G['CLASSICCHAT']
 	-- TODO: Normalize text
-	local url, body = string.match(string.lower(text), g.botSpamTest);
-
 	local weight = 0;
 	local threshold = 5
-	if url then
-		print(url .. ' ' .. 3);
+
+	if g.hasUrl(text) then
 		weight = 3;
-	else
-		body = text;
 	end
 
 	for i = 1, #g.botSpamPatterns do
 		local bsp = g.botSpamPatterns[i];
-		if (string[bsp.type](body, bsp.pattern)) then
+		if (string[bsp.type](text, bsp.pattern)) then
 			weight = weight + bsp.weight;
 			if weight >= threshold then
 				return true;
@@ -1068,12 +1093,12 @@ function CLASSICCHAT.spamRemoval_Notice(msg)
 	local blockMsg = '';
 
 	if g.settings.autoReport then
-		blockMsg = blockMsg .. string.format("[Spam Detection] User %s has been blocked and reported.", msg.name);
+		blockMsg = blockMsg .. string.format("User %s has been blocked and reported for spam.", msg.name);
 	else
-		blockMsg = blockMsg .. string.format("[Spam Detection] User %s has been blocked.", msg.name);
+		blockMsg = blockMsg .. string.format("User %s has been blocked for spam.", msg.name);
 	end
 	if g.settings.blockReason then
-		blockMsg = blockMsg .. "{nl}Reason:{nl}"..msg.text:sub(1,50);
+		blockMsg = blockMsg .. "{nl}Reason:{nl}"..msg.text:sub(1,50)..' ...';
 	end
 
 	CHAT_SYSTEM(blockMsg);
@@ -1114,7 +1139,7 @@ function CLASSICCHAT.RefreshFriendList()
 		
 		CLASSICCHAT.friendWhiteList[familyName] = true;
 		
-		CLASSICCHAT.NotifyFriendState(fInfo, familyName);
+		--CLASSICCHAT.NotifyFriendState(fInfo, familyName);
 	end
 end
 
@@ -1142,6 +1167,18 @@ function CLASSICCHAT.NotifyFriendState(fInfo, familyName)
 	g.friendLoginState[familyName].online = isOnlineCurr;
 end
 
+function CLASSICCHAT.clearBlocked()
+	local cnt = session.friends.GetFriendCount(FRIEND_LIST_BLOCKED);
+	local msg = '';
+	for i = 0 , cnt - 1 do
+		local f = session.friends.GetFriendByIndex(FRIEND_LIST_BLOCKED, i);	
+		local aid = f:GetInfo():GetACCID();
+			friends.RequestDelete(aid);
+		msg = msg .. "{nl}Block Removed: "..f:GetInfo():GetFamilyName();
+	end
+	CHAT_SYSTEM(msg);
+end
+
 
 function CLASSICCHAT.chatlog(text)
 	local acutil = require('acutil');
@@ -1166,12 +1203,15 @@ function CLASSICCHAT.testfilter(text)
 	print(tostring(CLASSICCHAT.filterMessage(text)));
 end
 
---[[
+
+
+
 
 function rel(txt)
 	dofile('addon_d/classicchat/classicchat.lua');
 	CLASSICCHAT_3SEC();
 end
+--[[
 
 function testscp()
 	local selCol = GET_SELECTED_COL();
