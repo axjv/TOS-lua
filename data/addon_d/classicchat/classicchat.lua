@@ -731,6 +731,7 @@ function CLASSICCHAT.insertlink(text, url, urlDisplay)
 	text = g.escape(text);
 	url = g.escape(url);
 	urlDisplay = urlDisplay or url;
+	text = text .. '   ';
 
 	local urlHttp = url;
 	if urlHttp:match("https?://") == nil then
@@ -753,8 +754,9 @@ function CLASSICCHAT.insertlink(text, url, urlDisplay)
 		urlDisplay = g.escape(g.unescape(urlDisplay):sub(1, maxLength-3));
 	end
 
-	text = text:gsub(url, linkFormat:format(urlHttp, '0000FF', urlDisplay));
-
+	text = text:gsub(url..'([^{^}])', linkFormat:format(urlHttp, '0000FF', urlDisplay) .. '%1');
+	text = text:sub(1,#text-3);
+	--text = g.insertText(text, "[^}]", ".", linkFormat:format(urlHttp, '0000FF', urlDisplay));
 	return g.unescape(text);
 end
 
@@ -808,28 +810,6 @@ function CLASSICCHAT.resizeChatCtrl(chatCtrl, label, txt, timeBox)
 	local groupBox = chatCtrl:GetParent();
 
 	if g.settings.theme == 'simple' then
-		--[[
-		local offsetX = 40;
-		local chatFrame = chatCtrl:GetParent():GetParent();
-		local lablWidth = txt:GetWidth() + 40;
-		local chatWidth = chatFrame:GetWidth();
-		label:Resize(chatWidth - offsetX, txt:GetHeight());
-		chatCtrl:Resize(chatWidth, label:GetHeight());
-		txt:SetTextMaxWidth(chatWidth - offsetX);
-
-		local width = groupBox:GetWidth()-40;
-		local chatWidth = groupBox:GetWidth();
-
-		label:Resize(width, label:GetHeight());
-		txt:SetMaxWidth(width);
-
-		local height = txt:GetHeight();
-
-		txt:Resize(width, height);
-		label:Resize(width, height);
-		chatCtrl:Resize(chatWidth, height);
-				]]
-
 
 		local labelWidth = txt:GetWidth();
 		local chatWidth = groupBox:GetWidth();
@@ -1206,12 +1186,12 @@ end
 
 
 
-
+--[[
 function rel(txt)
 	dofile('addon_d/classicchat/classicchat.lua');
 	CLASSICCHAT_3SEC();
 end
---[[
+
 
 function testscp()
 	local selCol = GET_SELECTED_COL();
