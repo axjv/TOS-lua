@@ -13,34 +13,6 @@
         ]
     },
     {
-        "name" : "Classic Chat",
-        "file" : "classicchat",
-        "extension" : "ipf",
-        "fileVersion" : "v2.0.7",
-        "releaseTag" : "cc-v2.0.0",
-        "unicode" : "⚘",
-        "description" : "Theme the chat window to be more similar to a classic MMO chat. Includes features such as gold spammer detection and auto blocking/reporting, timestamps, custom colors per channel, HTTP links and more. This addon has begun merging functionality with LKChat, please uninstall LKChat if you would like to use this. Slash commands: /chat, /classicchat, /lkc",
-        "tags" : [
-            "chat",
-            "ui"
-        ]
-    },
-    {
-        "name" : "Context Menu Additions",
-        "file" : "contextmenuadditions",
-        "extension" : "ipf",
-        "fileVersion" : "v1.0.0",
-        "releaseTag" : "cma-v1.0.0",
-        "unicode" : "⚘",
-        "description" : "Add more options to the context menus (right click) on actors and on chat messages, such as character info, report and block, clear sender messages, etc.",
-        "tags" : [
-            "chat",
-            "ui",
-            "context",
-            "menu"
-        ]
-    },
-    {
         "name" : "Fix Font Size Slider",
         "file" : "fixfontsizeslider",
         "extension" : "ipf",
