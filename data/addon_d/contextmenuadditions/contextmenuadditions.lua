@@ -285,7 +285,7 @@ end
 function CONTEXTMENUADDITIONS_3SEC()
 	local acutil = require('acutil');
 
-	acutil.setupHook(RESIZE_CHAT_CTRL_HOOKED, "RESIZE_CHAT_CTRL");
+	--acutil.setupHook(RESIZE_CHAT_CTRL_HOOKED, "RESIZE_CHAT_CTRL");
 	acutil.setupHook(SHOW_PC_CONTEXT_MENU_HOOKED, "SHOW_PC_CONTEXT_MENU");
 	acutil.setupHook(CHAT_RBTN_POPUP_HOOKED, "CHAT_RBTN_POPUP");
 	acutil.setupHook(OPEN_PARTY_MEMBER_INFO_HOOKED, "OPEN_PARTY_MEMBER_INFO");
