@@ -74,7 +74,7 @@ function CHAT_RBTN_POPUP_HOOKED(frame, chatCtrl)
 	elseif FRIEND_LIST_BLOCKED == friendsListType then
 		ui.AddContextMenuItem(subContextReport, "Report Bot & Clear Messages", blockReportClearScp);
 		ui.AddContextMenuItem(context, "Remove Message {img white_right_arrow 18 18}", removeMsgScp , nil, 0, 1, subContextRemove);
-		ui.AddContextMenuItem(context, "Report Bot {img white_right_arrow 18 18}",  reportScp, nil, 0, 1, subContextReport);
+		ui.AddContextMenuItem(context, "Report Bot {img white_right_arrow 18 18}", reportScp, nil, 0, 1, subContextReport);
 		ui.AddContextMenuItem(context, "Unblock", removeFriendScp);
 
 	else
@@ -282,10 +282,8 @@ if not removedClusterNames then
 end
 
 function CONTEXTMENUADDITIONS_ON_INIT(addon, frame)
-    addon:RegisterMsg("GAME_START_3SEC", "CONTEXTMENUADDITIONS_3SEC")
+	addon:RegisterMsg("GAME_START_3SEC", "CONTEXTMENUADDITIONS_3SEC")
 end
-
-
 
 function CONTEXTMENUADDITIONS_3SEC()
 	local acutil = require('acutil');
